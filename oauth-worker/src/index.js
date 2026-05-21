@@ -1,7 +1,7 @@
 /**
  * Cloudflare Worker — Decap CMS OAuth proxy for GitHub.
  *
- * Required secrets (set via `wrangler secret put`):
+ * Required secrets (set via `npx wrangler secret put`):
  *   - GITHUB_CLIENT_ID
  *   - GITHUB_CLIENT_SECRET
  *
@@ -46,8 +46,8 @@ function handleAuth(url, env) {
     client_id: env.GITHUB_CLIENT_ID,
     redirect_uri: `${url.origin}/callback`,
     scope: SCOPES.join(' '),
-    // A short random state for CSRF protection (not strictly verified server-side
-    // here — Decap re-posts the same value via the postMessage handshake).
+    // Short random state for CSRF protection. Decap re-posts the same value
+    // via the postMessage handshake; verification happens on the client side.
     state: crypto.randomUUID(),
   });
   return Response.redirect(`${GITHUB_OAUTH_URL}?${params}`, 302);

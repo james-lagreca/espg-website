@@ -76,8 +76,11 @@ red builds after pushes.
 ├── README.md                          # this file
 ├── MAINTAINERS.md                     # editor-facing guide
 ├── docs/
-│   ├── decap-cms-setup.md             # one-time OAuth setup walkthrough
-│   └── cf-worker-oauth.js             # Cloudflare Worker source (deployed separately)
+│   └── decap-cms-setup.md             # one-time OAuth setup walkthrough
+├── oauth-worker/                      # Cloudflare Worker (Decap OAuth proxy)
+│   ├── wrangler.toml
+│   ├── package.json
+│   └── src/index.js
 └── site/                              # the Astro project
     ├── astro.config.mjs               # site URL, base path
     ├── package.json                   # deps + scripts

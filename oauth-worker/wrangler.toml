@@ -1,0 +1,12 @@
+# Cloudflare Worker — Decap CMS OAuth proxy for the ESPG website.
+# Deploy with `npx wrangler deploy` from this directory.
+
+name = "espg-oauth"
+main = "src/index.js"
+compatibility_date = "2024-12-01"
+
+# Secrets (set via `npx wrangler secret put NAME`):
+#   GITHUB_CLIENT_ID
+#   GITHUB_CLIENT_SECRET
+#
+# Do not put secret values in this file.

@@ -1,0 +1,14 @@
+{
+  "name": "espg-oauth",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Decap CMS OAuth proxy for ESPG — deployed to Cloudflare Workers.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^3.99.0"
+  }
+}
