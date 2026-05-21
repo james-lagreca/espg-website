@@ -1,0 +1,73 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// TODO Phase 5: replace with real Google Form embed URL
+const formEmbedUrl: string | null = null;
+---
+
+<BaseLayout
+  title="Membership"
+  description="Join the Earth Sciences Postgraduate Group. Membership is free for SGEAS postgraduate students at the University of Melbourne."
+>
+  <p class="eyebrow">Membership</p>
+  <h1>Join ESPG</h1>
+
+  <div class="prose">
+    <p class="lede">
+      Membership is free for any postgraduate (Masters or PhD) enrolled in the School of
+      Geography, Earth and Atmospheric Sciences at the University of Melbourne.
+    </p>
+    <p>
+      Sign up using the form below — it takes about a minute. You'll be added to the mailing
+      list for event announcements and the annual conference call for abstracts.
+    </p>
+  </div>
+
+  {
+    formEmbedUrl ? (
+      <div class="form-frame">
+        <iframe
+          src={formEmbedUrl}
+          width="100%"
+          height="900"
+          frameborder="0"
+          marginheight="0"
+          marginwidth="0"
+          title="ESPG membership form"
+        >
+          Loading…
+        </iframe>
+      </div>
+    ) : (
+      <div class="placeholder">
+        <p>
+          <strong>Form embed pending.</strong> The Google Form URL will be added here during
+          content migration.
+        </p>
+      </div>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .lede {
+    font-size: 1.15rem;
+  }
+  .form-frame {
+    margin: var(--space-4) 0;
+  }
+  .form-frame iframe {
+    border: 1px solid var(--color-rule);
+    border-radius: 2px;
+  }
+  .placeholder {
+    margin: var(--space-4) 0;
+    padding: var(--space-4);
+    border: 1px dashed var(--color-rule);
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.02);
+  }
+  .placeholder p {
+    margin: 0;
+  }
+</style>

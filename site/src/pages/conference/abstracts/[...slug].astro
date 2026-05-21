@@ -1,0 +1,90 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { url } from '../../../lib/url';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('abstracts');
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<BaseLayout title={entry.data.title} description={`Abstract by ${entry.data.presenter}`}>
+  <p class="eyebrow">
+    <a href={url('/conference/abstracts')}>Abstracts</a>
+  </p>
+  <h1>{entry.data.title}</h1>
+
+  <p class="byline">
+    <strong>{entry.data.presenter}</strong>
+    {
+      entry.data.coauthors.length > 0 && (
+        <span class="muted">, {entry.data.coauthors.join(', ')}</span>
+      )
+    }
+    <br />
+    <span class="muted">{entry.data.affiliation}</span>
+  </p>
+
+  <dl class="meta">
+    {
+      entry.data.session && (
+        <div>
+          <dt>Session</dt>
+          <dd>{entry.data.session}</dd>
+        </div>
+      )
+    }
+    {
+      entry.data.slot && (
+        <div>
+          <dt>Slot</dt>
+          <dd>{entry.data.slot}</dd>
+        </div>
+      )
+    }
+  </dl>
+
+  <div class="prose">
+    <Content />
+    {
+      entry.data.pdfUrl && (
+        <p>
+          <a href={entry.data.pdfUrl}>Download PDF →</a>
+        </p>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .byline {
+    font-size: 1.05rem;
+    margin: 0 0 var(--space-3);
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+    margin: var(--space-3) 0 var(--space-4);
+    padding: var(--space-3) 0;
+    border-top: 1px solid var(--color-rule);
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .meta dt {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-muted);
+    margin-bottom: var(--space-1);
+  }
+  .meta dd {
+    margin: 0;
+  }
+</style>

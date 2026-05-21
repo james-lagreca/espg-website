@@ -1,0 +1,115 @@
+---
+import { url } from '../lib/url';
+
+const path = Astro.url.pathname.replace(/\/$/, '');
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const inConference = path.startsWith(`${base}/conference`);
+
+const societyNav = [
+  { label: 'Home', href: '/' },
+  { label: 'About', href: '/about' },
+  { label: 'Events', href: '/events' },
+  { label: 'Membership', href: '/membership' },
+  { label: 'Conference', href: '/conference' },
+];
+
+const conferenceNav = [
+  { label: 'Overview', href: '/conference' },
+  { label: 'Program', href: '/conference/program' },
+  { label: 'Abstracts', href: '/conference/abstracts' },
+  { label: 'Presenters', href: '/conference/presenters' },
+  { label: 'Practical info', href: '/conference/info' },
+  { label: '← Society', href: '/' },
+];
+
+const nav = inConference ? conferenceNav : societyNav;
+const isCurrent = (href: string) => {
+  const full = url(href).replace(/\/$/, '');
+  return full === path || (href !== '/' && path.startsWith(full));
+};
+---
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href={url('/')} class="brand">
+      <span class="brand-mark">ESPG</span>
+      <span class="brand-sub">Earth Sciences Postgraduate Group</span>
+    </a>
+    <nav aria-label={inConference ? 'Conference' : 'Society'}>
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a
+                href={url(item.href)}
+                aria-current={isCurrent(item.href) ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--color-rule);
+    background: var(--color-bg);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-3);
+    flex-wrap: wrap;
+  }
+  .brand {
+    text-decoration: none;
+    color: inherit;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+  .brand-mark {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .brand-sub {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+  }
+  @media (max-width: 540px) {
+    .brand-sub {
+      display: none;
+    }
+  }
+  nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+  nav a {
+    text-decoration: none;
+    color: var(--color-fg);
+    font-size: 0.95rem;
+  }
+  nav a[aria-current='page'] {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  nav a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+</style>

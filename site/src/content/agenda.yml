@@ -1,0 +1,47 @@
+- id: day1-welcome
+  day: Day 1 — Monday
+  time: "09:00"
+  title: Welcome and acknowledgement of country
+  type: session-header
+
+- id: day1-keynote
+  day: Day 1 — Monday
+  time: "09:15"
+  title: "Keynote: How postgraduates shape the next decade of earth sciences"
+  presenter: Sample Keynote Speaker
+  room: Carrillo Gantner Theatre
+  type: keynote
+
+- id: day1-morning-tea
+  day: Day 1 — Monday
+  time: "10:30"
+  title: Morning tea
+  type: break
+
+- id: day1-session-a
+  day: Day 1 — Monday
+  time: "11:00"
+  title: "Session: Active tectonics and seismic hazard"
+  type: session-header
+
+- id: day1-talk-1
+  day: Day 1 — Monday
+  time: "11:00"
+  title: Reconstructing late Quaternary fault slip rates along the Cadell Fault
+  presenter: Sample Presenter
+  room: Carrillo Gantner Theatre
+  type: talk
+  abstract: sample-abstract
+
+- id: day1-lunch
+  day: Day 1 — Monday
+  time: "12:30"
+  title: Lunch
+  type: lunch
+
+- id: day1-dinner
+  day: Day 1 — Monday
+  time: "19:00"
+  title: Conference dinner
+  room: TBC
+  type: social

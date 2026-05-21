@@ -1,0 +1,104 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { url } from '../../../lib/url';
+
+const all = (await getCollection('presenters')).sort((a, b) => a.data.order - b.data.order);
+const keynotes = all.filter((p) => p.data.role === 'keynote');
+const invited = all.filter((p) => p.data.role === 'invited');
+const others = all.filter((p) => p.data.role === 'speaker');
+---
+
+<BaseLayout
+  title="Presenters"
+  description="Keynote and invited speakers at the ESPG Annual Postgraduate Conference."
+>
+  <p class="eyebrow">
+    <a href={url('/conference')}>Conference</a>
+  </p>
+  <h1>Presenters</h1>
+
+  {
+    all.length === 0 ? (
+      <p class="muted">Speakers will be announced as they are confirmed.</p>
+    ) : (
+      <>
+        {keynotes.length > 0 && (
+          <section>
+            <h2>Keynote speakers</h2>
+            <ul class="presenter-grid">
+              {keynotes.map((p) => (
+                <li>
+                  <a href={url(`/conference/presenters/${p.id}`)}>
+                    <h3>{p.data.name}</h3>
+                    <p class="muted">{p.data.affiliation}</p>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+        {invited.length > 0 && (
+          <section>
+            <h2>Invited speakers</h2>
+            <ul class="presenter-grid">
+              {invited.map((p) => (
+                <li>
+                  <a href={url(`/conference/presenters/${p.id}`)}>
+                    <h3>{p.data.name}</h3>
+                    <p class="muted">{p.data.affiliation}</p>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+        {others.length > 0 && (
+          <section>
+            <h2>Speakers</h2>
+            <ul class="presenter-grid">
+              {others.map((p) => (
+                <li>
+                  <a href={url(`/conference/presenters/${p.id}`)}>
+                    <h3>{p.data.name}</h3>
+                    <p class="muted">{p.data.affiliation}</p>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .presenter-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-5);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: var(--space-3);
+  }
+  .presenter-grid a {
+    display: block;
+    padding: var(--space-3);
+    border: 1px solid var(--color-rule);
+    border-radius: 2px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .presenter-grid a:hover {
+    border-color: var(--color-accent);
+  }
+  .presenter-grid h3 {
+    margin: 0 0 var(--space-1);
+    font-size: 1.1rem;
+  }
+  .presenter-grid p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+</style>

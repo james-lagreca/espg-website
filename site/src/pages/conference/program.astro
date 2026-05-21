@@ -1,0 +1,140 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { url } from '../../lib/url';
+
+const items = (await getCollection('agenda')).sort((a, b) => {
+  if (a.data.day !== b.data.day) return a.data.day.localeCompare(b.data.day);
+  return a.data.time.localeCompare(b.data.time);
+});
+
+const days = [...new Set(items.map((i) => i.data.day))];
+
+const typeLabel: Record<string, string> = {
+  'session-header': 'Session',
+  keynote: 'Keynote',
+  talk: 'Talk',
+  break: 'Break',
+  lunch: 'Lunch',
+  social: 'Social',
+};
+---
+
+<BaseLayout
+  title="Program"
+  description="Full program for the ESPG Annual Postgraduate Conference, including sessions, talks, breaks and social events."
+>
+  <p class="eyebrow">
+    <a href={url('/conference')}>Conference</a>
+  </p>
+  <h1>Program</h1>
+
+  {
+    items.length === 0 ? (
+      <p class="muted">The program will be published closer to the conference date.</p>
+    ) : (
+      days.map((day) => (
+        <section class="day">
+          <h2>{day}</h2>
+          <table class="agenda">
+            <thead>
+              <tr>
+                <th scope="col">Time</th>
+                <th scope="col">Item</th>
+                <th scope="col">Presenter</th>
+                <th scope="col">Room</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items
+                .filter((i) => i.data.day === day)
+                .map((i) => (
+                  <tr class={`type-${i.data.type}`}>
+                    <td class="time">{i.data.time}</td>
+                    <td>
+                      <span class={`badge badge-${i.data.type}`}>{typeLabel[i.data.type]}</span>{' '}
+                      {i.data.abstract ? (
+                        <a href={url(`/conference/abstracts/${i.data.abstract}`)}>{i.data.title}</a>
+                      ) : (
+                        i.data.title
+                      )}
+                    </td>
+                    <td>{i.data.presenter ?? ''}</td>
+                    <td>{i.data.room ?? ''}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </section>
+      ))
+    )
+  }
+</BaseLayout>
+
+<style>
+  .day + .day {
+    margin-top: var(--space-5);
+  }
+  .agenda {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  .agenda th,
+  .agenda td {
+    text-align: left;
+    padding: var(--space-2) var(--space-3) var(--space-2) 0;
+    border-bottom: 1px solid var(--color-rule);
+    vertical-align: top;
+  }
+  .agenda th {
+    font-weight: 500;
+    color: var(--color-muted);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .time {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--color-muted);
+  }
+  .type-break,
+  .type-lunch,
+  .type-social {
+    background: rgba(0, 0, 0, 0.02);
+  }
+  .type-session-header td {
+    font-weight: 600;
+    background: rgba(58, 77, 42, 0.05);
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 1px 6px;
+    border-radius: 2px;
+    background: var(--color-rule);
+    color: var(--color-fg);
+    margin-right: var(--space-2);
+    vertical-align: 2px;
+  }
+  .badge-keynote {
+    background: var(--color-accent);
+    color: #fff;
+  }
+  .badge-talk {
+    background: rgba(58, 77, 42, 0.15);
+  }
+  .badge-session-header {
+    background: var(--color-accent);
+    color: #fff;
+  }
+  @media (max-width: 720px) {
+    .agenda th:nth-child(4),
+    .agenda td:nth-child(4) {
+      display: none;
+    }
+  }
+</style>

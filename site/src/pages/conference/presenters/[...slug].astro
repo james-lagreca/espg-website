@@ -1,0 +1,46 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { url } from '../../../lib/url';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('presenters');
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const roleLabel: Record<string, string> = {
+  keynote: 'Keynote speaker',
+  invited: 'Invited speaker',
+  speaker: 'Speaker',
+};
+---
+
+<BaseLayout title={entry.data.name} description={`${roleLabel[entry.data.role]} — ${entry.data.affiliation}`}>
+  <p class="eyebrow">
+    <a href={url('/conference/presenters')}>Presenters</a>
+  </p>
+  <h1>{entry.data.name}</h1>
+  <p class="role">
+    <span class="eyebrow">{roleLabel[entry.data.role]}</span>
+    <span class="muted">{entry.data.affiliation}</span>
+  </p>
+
+  <div class="prose">
+    <Content />
+  </div>
+</BaseLayout>
+
+<style>
+  .role {
+    margin: 0 0 var(--space-4);
+  }
+  .role .eyebrow {
+    display: inline;
+    margin-right: var(--space-3);
+  }
+</style>

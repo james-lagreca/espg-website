@@ -1,0 +1,95 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { url } from '../../../lib/url';
+
+const abstracts = (await getCollection('abstracts')).sort((a, b) =>
+  a.data.presenter.localeCompare(b.data.presenter),
+);
+
+const sessions = [...new Set(abstracts.map((a) => a.data.session).filter(Boolean))] as string[];
+---
+
+<BaseLayout
+  title="Abstracts"
+  description="Accepted abstracts for the ESPG Annual Postgraduate Conference."
+>
+  <p class="eyebrow">
+    <a href={url('/conference')}>Conference</a>
+  </p>
+  <h1>Abstracts</h1>
+
+  {
+    abstracts.length === 0 ? (
+      <p class="muted">Accepted abstracts will be published here after the review process closes.</p>
+    ) : (
+      <>
+        <p class="muted count">{abstracts.length} abstract{abstracts.length === 1 ? '' : 's'}</p>
+        {sessions.length > 0 ? (
+          sessions.map((s) => (
+            <section>
+              <h2>{s}</h2>
+              <ul class="abstract-list">
+                {abstracts
+                  .filter((a) => a.data.session === s)
+                  .map((a) => (
+                    <li>
+                      <a href={url(`/conference/abstracts/${a.id}`)}>
+                        <span class="abs-title">{a.data.title}</span>
+                        <span class="muted">
+                          {a.data.presenter} · {a.data.affiliation}
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+              </ul>
+            </section>
+          ))
+        ) : (
+          <ul class="abstract-list">
+            {abstracts.map((a) => (
+              <li>
+                <a href={url(`/conference/abstracts/${a.id}`)}>
+                  <span class="abs-title">{a.data.title}</span>
+                  <span class="muted">
+                    {a.data.presenter} · {a.data.affiliation}
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .count {
+    margin-bottom: var(--space-3);
+    font-size: 0.9rem;
+  }
+  .abstract-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-5);
+    border-top: 1px solid var(--color-rule);
+  }
+  .abstract-list li {
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .abstract-list a {
+    display: block;
+    padding: var(--space-3) 0;
+    text-decoration: none;
+    color: inherit;
+  }
+  .abstract-list a:hover .abs-title {
+    text-decoration: underline;
+  }
+  .abs-title {
+    display: block;
+    font-weight: 500;
+    margin-bottom: var(--space-1);
+  }
+</style>
