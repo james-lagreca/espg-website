@@ -1,0 +1,250 @@
+/* ESPG · Society design tokens — stratigraphic theme */
+
+:root {
+  /* Palette */
+  --bg: #18191a;
+  --bg-warm: #1d1e1c;
+  --bg-cool: #161819;
+  --bg-card: #1f2122;
+  --bone: #e6e1d6;
+  --bone-soft: #a6a097;
+  --muted: #6a655c;
+  --copper: #d07636;
+  --copper-soft: #9a5526;
+  --copper-bright: #e88a45;
+  --moss: #4a5c33;
+  --rule: #2e2f30;
+  --rule-warm: #3a3530;
+
+  /* Type */
+  --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-body: 'Hanken Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Layout */
+  --time-col: 7.5rem;
+  --page-max: 80rem;
+  --measure: 60ch;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2.5rem;
+  --space-6: 4rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--bone);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  font-weight: 400;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Atmospheric contour lines — subtle topo background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  z-index: 0;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 25% 35%, transparent 30%, rgba(208, 118, 54, 0.045) 30.3%, transparent 30.6%),
+    radial-gradient(ellipse 80% 60% at 25% 35%, transparent 40%, rgba(208, 118, 54, 0.04)  40.3%, transparent 40.6%),
+    radial-gradient(ellipse 80% 60% at 25% 35%, transparent 50%, rgba(208, 118, 54, 0.035) 50.3%, transparent 50.6%),
+    radial-gradient(ellipse 80% 60% at 75% 75%, transparent 25%, rgba(74, 92, 51, 0.045)  25.3%, transparent 25.6%),
+    radial-gradient(ellipse 80% 60% at 75% 75%, transparent 35%, rgba(74, 92, 51, 0.04)   35.3%, transparent 35.6%),
+    radial-gradient(ellipse 80% 60% at 75% 75%, transparent 45%, rgba(74, 92, 51, 0.035)  45.3%, transparent 45.6%);
+}
+
+a {
+  color: var(--bone);
+  text-decoration: none;
+  transition: color 180ms ease;
+}
+a:hover {
+  color: var(--copper);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+p {
+  margin: 0 0 var(--space-3);
+  max-width: var(--measure);
+}
+
+.muted { color: var(--bone-soft); }
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  margin: 0;
+}
+
+h1 {
+  font-variation-settings: 'opsz' 96, 'wdth' 100, 'wght' 600;
+  font-size: clamp(2.2rem, 5.6vw, 4.2rem);
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+}
+h2 {
+  font-variation-settings: 'opsz' 60, 'wdth' 100, 'wght' 500;
+  font-size: clamp(1.85rem, 3.8vw, 2.9rem);
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+h2 em {
+  font-style: italic;
+  font-variation-settings: 'opsz' 60, 'wdth' 95, 'wght' 400;
+  color: var(--copper);
+}
+h3 {
+  font-variation-settings: 'opsz' 24, 'wdth' 100, 'wght' 500;
+  font-size: clamp(1.05rem, 1.5vw, 1.2rem);
+  letter-spacing: -0.005em;
+  line-height: 1.2;
+}
+
+/* Accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.skip {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  z-index: 200;
+  padding: 0.5rem 1rem;
+  background: var(--copper);
+  color: var(--bg);
+}
+.skip:focus { top: 0; }
+
+/* Section utilities */
+.sect-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--copper);
+  margin-bottom: clamp(0.8rem, 1.5vw, 1.25rem);
+}
+.sect-tag::before {
+  content: '';
+  display: inline-block;
+  width: 1.8rem;
+  height: 1px;
+  background: var(--copper);
+}
+
+/* CTAs */
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1.3rem;
+  background: var(--copper);
+  color: #18191a;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+  border: none;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 200ms ease, transform 200ms ease, color 200ms ease;
+}
+.cta:hover {
+  background: var(--copper-bright);
+  color: #18191a;
+  transform: translateY(-1px);
+}
+.cta--ghost {
+  background: transparent;
+  color: var(--bone);
+  border: 1px solid var(--rule-warm);
+}
+.cta--ghost:hover {
+  background: transparent;
+  color: var(--copper);
+  border-color: var(--copper);
+}
+.cta .arrow {
+  display: inline-block;
+  transition: transform 200ms ease;
+}
+.cta:hover .arrow { transform: translateX(4px); }
+.cta-aside {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Reveal animation utility */
+.reveal {
+  opacity: 0;
+  transform: translateX(-12px);
+  animation: reveal-in 700ms cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+.reveal:nth-child(1) { animation-delay: 60ms; }
+.reveal:nth-child(2) { animation-delay: 140ms; }
+.reveal:nth-child(3) { animation-delay: 220ms; }
+.reveal:nth-child(4) { animation-delay: 300ms; }
+.reveal:nth-child(5) { animation-delay: 380ms; }
+.reveal:nth-child(6) { animation-delay: 460ms; }
+@keyframes reveal-in {
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

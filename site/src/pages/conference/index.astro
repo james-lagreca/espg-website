@@ -1,128 +1,73 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import ConferenceLayout from '../../layouts/ConferenceLayout.astro';
 import { url } from '../../lib/url';
 
 const conference = {
-  name: 'ESPG Annual Postgraduate Conference',
-  edition: 'TBA',
-  dates: 'Dates to be confirmed',
+  edition: 'Vol. XVIII · 2026',
+  dates: 'Dates to be confirmed (October 2026)',
   location: 'University of Melbourne — Parkville',
-  theme: 'Earth in transition',
+  theme: 'To be announced',
 };
 ---
 
-<BaseLayout
-  title="Conference"
+<ConferenceLayout
+  title="Overview"
   description="The ESPG Annual Postgraduate Conference — a peer-led venue for earth sciences HDR students to present work-in-progress."
 >
-  <p class="eyebrow">ESPG Conference</p>
-  <h1>{conference.name}</h1>
+  <p class="eyebrow">Overview</p>
+  <h1>The ESPG Annual Postgraduate Conference.</h1>
+
+  <p class="lede">
+    A peer-led conference for postgraduate students working across the earth sciences — a
+    supportive venue for HDR students to present work-in-progress alongside invited keynote
+    speakers from across the discipline.
+  </p>
 
   <dl class="meta">
-    <div>
-      <dt>Edition</dt>
-      <dd>{conference.edition}</dd>
-    </div>
-    <div>
-      <dt>Dates</dt>
-      <dd>{conference.dates}</dd>
-    </div>
-    <div>
-      <dt>Location</dt>
-      <dd>{conference.location}</dd>
-    </div>
-    <div>
-      <dt>Theme</dt>
-      <dd>{conference.theme}</dd>
-    </div>
+    <div><dt>Edition</dt><dd>{conference.edition}</dd></div>
+    <div><dt>Dates</dt><dd>{conference.dates}</dd></div>
+    <div><dt>Location</dt><dd>{conference.location}</dd></div>
+    <div><dt>Theme</dt><dd>{conference.theme}</dd></div>
   </dl>
 
-  <div class="prose">
-    <p class="lede">
-      A peer-led conference for postgraduate students working across the earth sciences. The
-      conference is a supportive venue for HDR students to present work-in-progress alongside
-      invited keynote speakers from across the discipline.
-    </p>
+  <h2>What to expect</h2>
+  <ul>
+    <li>Postgraduate research talks across geology, geophysics, atmospheric and environmental sciences.</li>
+    <li>Invited keynotes from senior researchers and industry.</li>
+    <li>Poster session and lightning talks for early-stage work.</li>
+    <li>Social events and conference dinner.</li>
+  </ul>
 
-    <h2>What to expect</h2>
-    <ul>
-      <li>Postgraduate research talks across geology, geophysics, atmospheric and environmental sciences.</li>
-      <li>Invited keynotes from senior researchers and industry.</li>
-      <li>Poster session and lightning talks for early-stage work.</li>
-      <li>Social events and conference dinner.</li>
-    </ul>
-
-    <h2>Registration</h2>
-    <p>
-      Registration opens closer to the conference date. Members of ESPG will be notified by
-      email. <a href={url('/membership')}>Become a member</a> to receive announcements.
-    </p>
-  </div>
-
-  <hr />
-
-  <nav class="next-up" aria-label="Conference sections">
-    <a href={url('/conference/program')}>
-      <span class="eyebrow">Program</span>
-      <span>Sessions, talks and timing</span>
-    </a>
-    <a href={url('/conference/abstracts')}>
-      <span class="eyebrow">Abstracts</span>
-      <span>Browse accepted presentations</span>
-    </a>
-    <a href={url('/conference/presenters')}>
-      <span class="eyebrow">Presenters</span>
-      <span>Keynote and invited speakers</span>
-    </a>
-    <a href={url('/conference/info')}>
-      <span class="eyebrow">Practical info</span>
-      <span>Venue, travel, accommodation</span>
-    </a>
-  </nav>
-</BaseLayout>
+  <h2>Registration</h2>
+  <p>
+    Registration opens closer to the conference date. Members of ESPG will be notified by email.
+    <a href={url('/membership')}>Become a member</a> to receive announcements.
+  </p>
+</ConferenceLayout>
 
 <style>
   .meta {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-5);
-    margin: var(--space-3) 0 var(--space-4);
-    padding: var(--space-3) 0;
-    border-top: 1px solid var(--color-rule);
-    border-bottom: 1px solid var(--color-rule);
+    gap: 1.5rem 3rem;
+    margin: 2rem 0 2.5rem;
+    padding: 1.25rem 0;
+    border-top: 1px solid var(--c-rule);
+    border-bottom: 1px solid var(--c-rule);
   }
   .meta dt {
     font-size: 0.78rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--color-muted);
-    margin-bottom: var(--space-1);
+    letter-spacing: 0.12em;
+    color: var(--c-muted);
+    margin-bottom: 0.25rem;
   }
   .meta dd {
     margin: 0;
+    font-family: 'Newsreader', Georgia, serif;
+    font-variation-settings: 'opsz' 28;
+    font-size: 1.1rem;
   }
-  .lede {
-    font-size: 1.15rem;
-  }
-  .next-up {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-    gap: var(--space-3);
-    margin-top: var(--space-4);
-  }
-  .next-up a {
-    display: block;
-    padding: var(--space-3);
-    border: 1px solid var(--color-rule);
-    border-radius: 2px;
-    text-decoration: none;
-    color: inherit;
-  }
-  .next-up a:hover {
-    border-color: var(--color-accent);
-  }
-  .next-up .eyebrow {
-    display: block;
-    margin-bottom: var(--space-1);
-  }
+  ul { padding-left: 1.2rem; max-width: 60ch; }
+  li { margin-bottom: 0.4rem; }
 </style>

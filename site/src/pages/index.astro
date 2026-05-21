@@ -1,132 +1,380 @@
 ---
 import { getCollection } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
+import SocietyLayout from '../layouts/SocietyLayout.astro';
+import SocietyMasthead from '../components/society/SocietyMasthead.astro';
 import { url } from '../lib/url';
 
 const now = new Date();
-const events = (await getCollection('events', ({ data }) => !data.draft))
-  .filter((e) => (e.data.endDate ?? e.data.date) >= now)
-  .sort((a, b) => a.data.date.getTime() - b.data.date.getTime())
-  .slice(0, 3);
 
-const dateFmt = new Intl.DateTimeFormat('en-AU', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-});
+const allEvents = (await getCollection('events', ({ data }) => !data.draft)).filter(
+  (e) => (e.data.endDate ?? e.data.date) >= now,
+).sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
+
+const featured = allEvents.slice(0, 3).map((e) => ({
+  id: e.id,
+  date: e.data.date,
+  title: e.data.title,
+  location: e.data.location,
+}));
+
+const register = allEvents.slice(0, 6);
+const dayFmt = new Intl.DateTimeFormat('en-AU', { day: '2-digit', month: 'short' });
+const wdFmt = new Intl.DateTimeFormat('en-AU', { weekday: 'short' });
+
+const committee = (await getCollection('committee')).sort((a, b) => a.data.order - b.data.order);
 ---
 
-<BaseLayout
+<SocietyLayout
   title="ESPG — Earth Sciences Postgraduate Group"
   description="The Earth Sciences Postgraduate Group is a student-run society at the University of Melbourne for postgraduates working across geology, geophysics, atmospheric and environmental sciences."
 >
-  <section class="hero">
-    <p class="eyebrow">University of Melbourne</p>
-    <h1>Earth Sciences Postgraduate Group</h1>
-    <p class="lede">
-      A student-run community for postgraduates in the School of Geography, Earth and Atmospheric
-      Sciences. We run social events, fieldwork, and an annual conference for early-career
-      researchers.
-    </p>
-    <p>
-      <a href={url('/membership')} class="cta">Become a member</a>
-    </p>
-  </section>
+  <SocietyMasthead featured={featured} />
 
-  <hr />
+  <!-- REGISTER -->
+  <section id="events" class="section">
+    <p class="sect-tag">Register</p>
+    <h2>Upcoming events, <em>tabulated.</em></h2>
+    <p class="muted">The six closest dates. Full archive on the <a href={url('/events')}>events page</a>.</p>
 
-  <section>
-    <h2>Upcoming events</h2>
     {
-      events.length === 0 ? (
+      register.length === 0 ? (
         <p class="muted">No upcoming events scheduled — check back soon.</p>
       ) : (
-        <ul class="event-list">
-          {events.map((e) => (
+        <ol class="register">
+          {register.map((e) => {
+            const [day, mo] = dayFmt.format(e.data.date).split(' ');
+            const wd = wdFmt.format(e.data.date);
+            return (
+              <li>
+                <a href={url(`/events/${e.id}`)}>
+                  <span class="reg-date">
+                    {day}<span class="mo">{mo} '{e.data.date.getFullYear().toString().slice(2)}</span>
+                  </span>
+                  <div class="reg-mid">
+                    <h3>{e.data.title}</h3>
+                    <span class="loc">{wd} · {e.data.location}</span>
+                  </div>
+                  <span class="arrow-mark" aria-hidden="true">→</span>
+                </a>
+              </li>
+            );
+          })}
+        </ol>
+      )
+    }
+    <div class="cta-row">
+      <a href={url('/events')} class="cta cta--ghost">Full register <span class="arrow">→</span></a>
+      <span class="cta-aside">Subscribe to event emails when you join.</span>
+    </div>
+  </section>
+
+  <!-- MEMBERSHIP -->
+  <section id="membership" class="section section--warm">
+    <p class="sect-tag">Membership</p>
+    <h2>Free. <em>For any postgrad</em> in the school.</h2>
+    <div class="join-grid">
+      <div>
+        <p>
+          Membership takes about a minute to sign up. There are no fees, no formal commitments,
+          and you can stay on the mailing list for as long as you're a postgraduate in SGEAS.
+        </p>
+        <ul class="join-pills">
+          <li><span class="ix">01</span><span class="it">Event emails — BBQs, field trips, pub nights, conferences.</span></li>
+          <li><span class="ix">02</span><span class="it">Conference call for abstracts each August.</span></li>
+          <li><span class="ix">03</span><span class="it">School-level representation through the HDR rep.</span></li>
+          <li><span class="ix">04</span><span class="it">Travel and conference bursaries (where budget allows).</span></li>
+          <li><span class="ix">05</span><span class="it">Occasional opportunities from outside the school.</span></li>
+        </ul>
+        <div class="cta-row">
+          <a href={url('/membership')} class="cta">Join the society <span class="arrow">→</span></a>
+          <a href={url('/membership')} class="cta cta--ghost">Mailing list only</a>
+        </div>
+      </div>
+      <aside class="join-card">
+        <dl class="join-stat">
+          <dt>Members</dt><dd><strong>120+</strong> across SGEAS</dd>
+          <dt>Cost</dt><dd><strong>Free</strong> for SGEAS HDRs</dd>
+          <dt>Events / yr</dt><dd><strong>16</strong> on average</dd>
+          <dt>Conference</dt><dd><strong>Annual</strong>, in October</dd>
+          <dt>Founded</dt><dd><strong>2007</strong></dd>
+          <dt>Affiliated</dt><dd>UMSU GSA</dd>
+        </dl>
+      </aside>
+    </div>
+  </section>
+
+  <!-- CONFERENCE teaser -->
+  <section id="conference-teaser" class="section">
+    <p class="sect-tag">Conference</p>
+    <div class="conf-grid">
+      <div>
+        <h2>An annual <em>postgraduate</em> conference, in October.</h2>
+        <p>
+          Three days of HDR-led talks alongside invited keynotes from across the earth sciences.
+          The conference is a supportive venue for students to present work-in-progress, get
+          feedback from peers, and meet researchers from outside their immediate group.
+        </p>
+        <p class="muted">Registration opens August. Call for abstracts the same week.</p>
+        <a href={url('/conference')} class="cta">Conference details <span class="arrow">→</span></a>
+      </div>
+      <aside class="conf-card">
+        <dl>
+          <dt>Dates</dt><dd><strong>18–20 Oct 2026</strong></dd>
+          <dt>Location</dt><dd>University of Melbourne, Parkville</dd>
+          <dt>Theme</dt><dd>TBA</dd>
+          <dt>Keynote</dt><dd>To be announced</dd>
+          <dt>Format</dt><dd>Talks · posters · lightning</dd>
+          <dt>Abstracts</dt><dd>Open Aug · close Sep</dd>
+        </dl>
+      </aside>
+    </div>
+  </section>
+
+  <!-- COMMITTEE -->
+  <section id="committee" class="section section--cool">
+    <p class="sect-tag">Committee</p>
+    <h2>Six elected roles. <em>One year.</em></h2>
+    <p class="muted">Voted at the AGM each March. All current postgraduates in SGEAS.</p>
+    {
+      committee.length === 0 ? (
+        <p class="muted">Committee members will be listed once content is migrated.</p>
+      ) : (
+        <ul class="committee-grid">
+          {committee.slice(0, 8).map((m) => (
             <li>
-              <a href={url(`/events/${e.id}`)}>
-                <time datetime={e.data.date.toISOString()}>{dateFmt.format(e.data.date)}</time>
-                <span class="event-title">{e.data.title}</span>
-                <span class="muted">{e.data.location}</span>
-              </a>
+              <span class="role">{m.data.role}</span>
+              <span class="desc">{m.data.name}</span>
             </li>
           ))}
         </ul>
       )
     }
-    <p><a href={url('/events')}>All events →</a></p>
+    <p style="margin-top: 1.25rem;"><a href={url('/about')}>More about ESPG →</a></p>
   </section>
-
-  <hr />
-
-  <section class="prose">
-    <h2>Annual conference</h2>
-    <p>
-      Each year ESPG hosts a postgraduate-led conference: a low-stakes, supportive venue for HDR
-      students to present work-in-progress alongside invited keynote speakers from across the
-      earth sciences.
-    </p>
-    <p>
-      <a href={url('/conference')}>Conference details →</a>
-    </p>
-  </section>
-</BaseLayout>
+</SocietyLayout>
 
 <style>
-  .hero {
-    padding: var(--space-4) 0 var(--space-3);
+  .section {
+    position: relative;
+    padding: clamp(3rem, 6vw, 5rem) 0;
+    border-bottom: 1px solid var(--rule);
   }
-  .lede {
-    font-size: 1.15rem;
-    max-width: var(--measure);
+  .section--warm {
+    background: var(--bg-warm);
+    margin: 0 calc(-1 * clamp(1.5rem, 4vw, 3rem));
+    padding-left: clamp(1.5rem, 4vw, 3rem);
+    padding-right: clamp(1.5rem, 4vw, 3rem);
   }
-  .cta {
-    display: inline-block;
-    margin-top: var(--space-2);
-    padding: 0.7rem 1.2rem;
-    background: var(--color-accent);
-    color: #fff;
-    border-radius: 2px;
-    text-decoration: none;
-    font-size: 0.95rem;
+  .section--cool {
+    background: var(--bg-cool);
+    margin: 0 calc(-1 * clamp(1.5rem, 4vw, 3rem));
+    padding-left: clamp(1.5rem, 4vw, 3rem);
+    padding-right: clamp(1.5rem, 4vw, 3rem);
   }
-  .cta:hover {
-    background: var(--color-accent-hover);
-    color: #fff;
-  }
-  .event-list {
+
+  /* Register */
+  .register {
     list-style: none;
+    margin: 1.25rem 0 0;
     padding: 0;
-    margin: 0 0 var(--space-3);
-    border-top: 1px solid var(--color-rule);
+    border-top: 1px solid var(--rule);
   }
-  .event-list li {
-    border-bottom: 1px solid var(--color-rule);
+  .register li {
+    border-bottom: 1px solid var(--rule);
   }
-  .event-list a {
+  .register a {
     display: grid;
-    grid-template-columns: 9rem 1fr auto;
-    gap: var(--space-3);
-    padding: var(--space-3) 0;
+    grid-template-columns: minmax(0, 4.5rem) minmax(0, 1fr) minmax(0, auto);
+    gap: clamp(1rem, 2vw, 2rem);
+    padding: 1.25rem 0;
     text-decoration: none;
     color: inherit;
-    align-items: baseline;
+    align-items: center;
+    transition: background 160ms;
   }
-  .event-list a:hover .event-title {
-    text-decoration: underline;
+  .register a:hover {
+    background: rgba(208, 118, 54, 0.04);
+    color: inherit;
   }
-  .event-list time {
-    color: var(--color-muted);
-    font-variant-numeric: tabular-nums;
-    font-size: 0.92rem;
+  .register a:hover h3 { color: var(--copper); }
+  .reg-date {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 60, 'wdth' 95, 'wght' 600;
+    font-size: clamp(2.2rem, 4vw, 3rem);
+    line-height: 0.85;
+    letter-spacing: -0.025em;
+    color: var(--bone);
   }
-  .event-title {
+  .reg-date .mo {
+    display: block;
+    font-family: var(--font-mono);
+    font-variation-settings: normal;
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--copper);
+    margin-top: 0.35rem;
     font-weight: 500;
   }
-  @media (max-width: 600px) {
-    .event-list a {
-      grid-template-columns: 1fr;
-      gap: var(--space-1);
-    }
+  .reg-mid h3 {
+    margin: 0 0 0.2rem;
+    transition: color 160ms;
+  }
+  .reg-mid .loc {
+    font-size: 0.86rem;
+    color: var(--bone-soft);
+  }
+  .arrow-mark {
+    font-family: var(--font-mono);
+    color: var(--bone-soft);
+    font-size: 1.1rem;
+  }
+  .register a:hover .arrow-mark { color: var(--copper); }
+  @media (max-width: 720px) {
+    .register a { grid-template-columns: minmax(0, 4.5rem) 1fr; row-gap: 0.5rem; }
+    .arrow-mark { display: none; }
+  }
+
+  .cta-row {
+    margin-top: 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+    align-items: center;
+  }
+
+  /* Join */
+  .join-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(2rem, 4vw, 3.5rem);
+    margin-top: 0.75rem;
+  }
+  @media (max-width: 720px) { .join-grid { grid-template-columns: 1fr; } }
+
+  .join-pills {
+    list-style: none;
+    margin: 1.25rem 0 1.75rem;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+  .join-pills li {
+    display: grid;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+    gap: 0.85rem;
+    align-items: baseline;
+  }
+  .join-pills .ix {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--copper);
+    letter-spacing: 0.06em;
+    font-weight: 500;
+  }
+  .join-pills .it { font-size: 0.98rem; line-height: 1.4; }
+
+  .join-card {
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    border: 1px solid var(--rule-warm);
+    background: linear-gradient(180deg, rgba(208, 118, 54, 0.08), transparent 75%);
+    position: relative;
+  }
+  .join-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--copper);
+  }
+  .join-stat {
+    display: grid;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+    gap: 0.6rem 1rem;
+    margin: 0;
+    padding: 0;
+    font-size: 0.9rem;
+  }
+  .join-stat dt {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--bone-soft);
+    align-self: center;
+    white-space: nowrap;
+  }
+  .join-stat dd { margin: 0; }
+  .join-stat dd strong {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 24, 'wdth' 100, 'wght' 500;
+    font-size: 1.05rem;
+    color: var(--copper);
+  }
+
+  /* Conference */
+  .conf-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: clamp(2rem, 4vw, 3.5rem);
+    align-items: start;
+  }
+  @media (max-width: 720px) { .conf-grid { grid-template-columns: 1fr; } }
+  .conf-card {
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    border: 1px solid var(--rule-warm);
+    background: var(--bg-card);
+  }
+  .conf-card dl {
+    display: grid;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+    gap: 0.7rem 1.5rem;
+    margin: 0;
+    font-size: 0.92rem;
+  }
+  .conf-card dt {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--bone-soft);
+    align-self: center;
+    white-space: nowrap;
+  }
+  .conf-card dd { margin: 0; }
+  .conf-card dd strong {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 24, 'wdth' 100, 'wght' 500;
+    font-size: 1.05rem;
+    color: var(--copper);
+  }
+
+  /* Committee */
+  .committee-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-top: 1.5rem;
+  }
+  .committee-grid li {
+    list-style: none;
+    background: var(--bg);
+    padding: 1.1rem 1.2rem;
+  }
+  .committee-grid .role {
+    display: block;
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 24, 'wdth' 100, 'wght' 500;
+    font-size: 1rem;
+    letter-spacing: -0.005em;
+    margin-bottom: 0.15rem;
+  }
+  .committee-grid .desc {
+    font-size: 0.83rem;
+    color: var(--bone-soft);
   }
 </style>

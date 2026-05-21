@@ -1,0 +1,193 @@
+---
+/**
+ * International Chronostratigraphic Chart (ICS 2023) — proportional column.
+ * Total = 4567 Ma (Hadean start). Cenozoic at top is intentionally a thin sliver.
+ */
+const timeScale = [
+  { name: 'Cenozoic',    fromMa:   66.0, toMa:    0.0, color: '#F2F91D' },
+  { name: 'Mesozoic',    fromMa:  251.9, toMa:   66.0, color: '#67C5CA' },
+  { name: 'Paleozoic',   fromMa:  538.8, toMa:  251.9, color: '#99C08D' },
+  { name: 'Proterozoic', fromMa: 2500.0, toMa:  538.8, color: '#F73DC2' },
+  { name: 'Archean',     fromMa: 4000.0, toMa: 2500.0, color: '#F0047F' },
+  { name: 'Hadean',      fromMa: 4567.0, toMa: 4000.0, color: '#AB145A' },
+];
+const TOTAL_MA = 4567.0;
+const bands = timeScale.map((t) => ({
+  ...t,
+  topPct: (t.toMa / TOTAL_MA) * 100,
+  bottomPct: (t.fromMa / TOTAL_MA) * 100,
+  heightPct: ((t.fromMa - t.toMa) / TOTAL_MA) * 100,
+}));
+---
+
+<aside class="gts" aria-label="Geological time scale">
+  <div class="gts-col">
+    {
+      bands.map((b) => (
+        <div
+          class="gts-band"
+          style={`top: ${b.topPct}%; height: ${b.heightPct}%; background: ${b.color};`}
+          title={`${b.name} — ${b.fromMa} to ${b.toMa} Ma`}
+        />
+      ))
+    }
+    <div class="gts-now" aria-hidden="true"></div>
+  </div>
+
+  <div class="gts-labels">
+    <div class="gts-now-label">
+      ● Now<span class="yr">2026 CE</span>
+    </div>
+    {
+      bands.map((b) => {
+        const centrePct = b.topPct + b.heightPct / 2;
+        // Push the thin Phanerozoic labels down so they don't collide with "Now"
+        const safeTop =
+          b.name === 'Cenozoic' ? 6.5
+          : b.name === 'Mesozoic' ? 10.5
+          : b.name === 'Paleozoic' ? 15.5
+          : centrePct;
+        return (
+          <div class="gts-label" style={`top: ${safeTop}%;`}>
+            <span class="nm">{b.name}</span>
+            <span class="age">{b.fromMa.toFixed(1).replace(/\.0$/, '')} Ma</span>
+          </div>
+        );
+      })
+    }
+    <div class="gts-footer">ICS chart · proportional · 4,567 Ma</div>
+  </div>
+</aside>
+
+<style>
+  .gts {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--time-col);
+    z-index: 40;
+    pointer-events: none;
+    padding: 1rem 0.75rem 1.25rem 1rem;
+    display: flex;
+    gap: 0.6rem;
+    border-right: 1px solid var(--rule);
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.25), transparent);
+  }
+  .gts-col {
+    position: relative;
+    width: 22px;
+    flex: 0 0 22px;
+    border: 1px solid var(--rule-warm);
+    background: var(--bg-cool);
+    overflow: hidden;
+  }
+  .gts-band {
+    position: absolute;
+    left: 0;
+    right: 0;
+  }
+  .gts-band::after {
+    content: '';
+    position: absolute;
+    left: -2px;
+    right: -2px;
+    top: 0;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.35);
+  }
+  .gts-band:first-child::after { display: none; }
+
+  .gts-now {
+    position: absolute;
+    left: -10px;
+    top: 0;
+    width: 16px;
+    height: 16px;
+    background: var(--copper);
+    border: 2px solid var(--bg);
+    border-radius: 50%;
+    z-index: 2;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(208, 118, 54, 0.6); }
+    50%      { box-shadow: 0 0 22px rgba(208, 118, 54, 0.95); }
+  }
+
+  .gts-labels {
+    position: relative;
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    line-height: 1.25;
+    letter-spacing: 0.05em;
+    color: var(--bone-soft);
+  }
+  .gts-label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    padding-left: 0.4rem;
+    transform: translateY(-50%);
+  }
+  .gts-label .nm {
+    display: block;
+    color: var(--bone);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.62rem;
+    font-weight: 500;
+  }
+  .gts-label .age {
+    display: block;
+    color: var(--muted);
+    font-size: 0.58rem;
+    margin-top: 1px;
+  }
+  .gts-label::before {
+    content: '';
+    position: absolute;
+    left: -0.6rem;
+    top: 50%;
+    width: 0.4rem;
+    height: 1px;
+    background: var(--rule);
+  }
+  .gts-now-label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    padding-left: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    line-height: 1.1;
+    color: var(--copper);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .gts-now-label .yr {
+    display: block;
+    color: var(--bone-soft);
+    text-transform: none;
+    letter-spacing: 0.04em;
+    margin-top: 1px;
+  }
+  .gts-footer {
+    position: absolute;
+    left: 1rem;
+    right: 0.75rem;
+    bottom: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    line-height: 1.3;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 860px) {
+    .gts { display: none; }
+  }
+</style>

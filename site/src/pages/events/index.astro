@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import SocietyLayout from '../../layouts/SocietyLayout.astro';
+import PageHeader from '../../components/society/PageHeader.astro';
 import { url } from '../../lib/url';
 
 const now = new Date();
@@ -13,104 +14,125 @@ const upcoming = all
   .sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
 const past = all.filter((e) => (e.data.endDate ?? e.data.date) < now);
 
-const dateFmt = new Intl.DateTimeFormat('en-AU', {
-  weekday: 'short',
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-});
+const dayFmt = new Intl.DateTimeFormat('en-AU', { day: '2-digit', month: 'short' });
+const wdFmt = new Intl.DateTimeFormat('en-AU', { weekday: 'short' });
 ---
 
-<BaseLayout
+<SocietyLayout
   title="Events"
   description="Upcoming and past events run by the ESPG, including social events, field trips, and the annual postgraduate conference."
 >
-  <p class="eyebrow">Events</p>
-  <h1>Events</h1>
+  <PageHeader
+    eyebrow="Events"
+    title="Upcoming events, tabulated."
+    lede="BBQs, field trips, pub nights, reading groups, and the annual conference. Members get an email for every entry."
+  />
 
-  <section>
-    <h2>Upcoming</h2>
+  <section class="block">
+    <p class="sect-tag">Upcoming</p>
     {
       upcoming.length === 0 ? (
         <p class="muted">No upcoming events scheduled. Check back soon.</p>
       ) : (
-        <ul class="event-list">
-          {upcoming.map((e) => (
-            <li>
-              <a href={url(`/events/${e.id}`)}>
-                <time datetime={e.data.date.toISOString()}>{dateFmt.format(e.data.date)}</time>
-                <div>
-                  <span class="event-title">{e.data.title}</span>
-                  <span class="muted location">{e.data.location}</span>
-                </div>
-              </a>
-            </li>
-          ))}
-        </ul>
+        <ol class="register">
+          {upcoming.map((e) => {
+            const [day, mo] = dayFmt.format(e.data.date).split(' ');
+            const wd = wdFmt.format(e.data.date);
+            return (
+              <li>
+                <a href={url(`/events/${e.id}`)}>
+                  <span class="reg-date">
+                    {day}<span class="mo">{mo} '{e.data.date.getFullYear().toString().slice(2)}</span>
+                  </span>
+                  <div class="reg-mid">
+                    <h3>{e.data.title}</h3>
+                    <span class="loc">{wd} · {e.data.location}</span>
+                  </div>
+                  <span class="arrow-mark" aria-hidden="true">→</span>
+                </a>
+              </li>
+            );
+          })}
+        </ol>
       )
     }
   </section>
 
   {
     past.length > 0 && (
-      <section>
-        <h2>Past events</h2>
-        <ul class="event-list">
-          {past.map((e) => (
-            <li>
-              <a href={url(`/events/${e.id}`)}>
-                <time datetime={e.data.date.toISOString()}>{dateFmt.format(e.data.date)}</time>
-                <div>
-                  <span class="event-title">{e.data.title}</span>
-                  <span class="muted location">{e.data.location}</span>
-                </div>
-              </a>
-            </li>
-          ))}
-        </ul>
+      <section class="block">
+        <p class="sect-tag">Past events</p>
+        <ol class="register">
+          {past.map((e) => {
+            const [day, mo] = dayFmt.format(e.data.date).split(' ');
+            const wd = wdFmt.format(e.data.date);
+            return (
+              <li>
+                <a href={url(`/events/${e.id}`)}>
+                  <span class="reg-date">
+                    {day}<span class="mo">{mo} '{e.data.date.getFullYear().toString().slice(2)}</span>
+                  </span>
+                  <div class="reg-mid">
+                    <h3>{e.data.title}</h3>
+                    <span class="loc">{wd} · {e.data.location}</span>
+                  </div>
+                  <span class="arrow-mark" aria-hidden="true">→</span>
+                </a>
+              </li>
+            );
+          })}
+        </ol>
       </section>
     )
   }
-</BaseLayout>
+</SocietyLayout>
 
 <style>
-  .event-list {
+  .block { padding: clamp(1rem, 2vw, 2rem) 0 clamp(3rem, 5vw, 4rem); }
+  .register {
     list-style: none;
+    margin: 1.25rem 0 0;
     padding: 0;
-    margin: 0 0 var(--space-5);
-    border-top: 1px solid var(--color-rule);
+    border-top: 1px solid var(--rule);
   }
-  .event-list li {
-    border-bottom: 1px solid var(--color-rule);
-  }
-  .event-list a {
+  .register li { border-bottom: 1px solid var(--rule); }
+  .register a {
     display: grid;
-    grid-template-columns: 11rem 1fr;
-    gap: var(--space-3);
-    padding: var(--space-3) 0;
+    grid-template-columns: minmax(0, 4.5rem) minmax(0, 1fr) minmax(0, auto);
+    gap: clamp(1rem, 2vw, 2rem);
+    padding: 1.25rem 0;
     text-decoration: none;
     color: inherit;
-    align-items: baseline;
+    align-items: center;
+    transition: background 160ms;
   }
-  .event-list a:hover .event-title {
-    text-decoration: underline;
+  .register a:hover { background: rgba(208, 118, 54, 0.04); color: inherit; }
+  .register a:hover h3 { color: var(--copper); }
+  .reg-date {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 60, 'wdth' 95, 'wght' 600;
+    font-size: clamp(2.2rem, 4vw, 3rem);
+    line-height: 0.85;
+    letter-spacing: -0.025em;
+    color: var(--bone);
   }
-  .event-list time {
-    color: var(--color-muted);
-    font-variant-numeric: tabular-nums;
-    font-size: 0.92rem;
-  }
-  .event-title {
+  .reg-date .mo {
+    display: block;
+    font-family: var(--font-mono);
+    font-variation-settings: normal;
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--copper);
+    margin-top: 0.35rem;
     font-weight: 500;
-    margin-right: var(--space-3);
   }
-  .location {
-    font-size: 0.9rem;
-  }
-  @media (max-width: 600px) {
-    .event-list a {
-      grid-template-columns: 1fr;
-      gap: var(--space-1);
-    }
+  .reg-mid h3 { margin: 0 0 0.2rem; transition: color 160ms; }
+  .reg-mid .loc { font-size: 0.86rem; color: var(--bone-soft); }
+  .arrow-mark { font-family: var(--font-mono); color: var(--bone-soft); font-size: 1.1rem; }
+  .register a:hover .arrow-mark { color: var(--copper); }
+  @media (max-width: 720px) {
+    .register a { grid-template-columns: minmax(0, 4.5rem) 1fr; row-gap: 0.5rem; }
+    .arrow-mark { display: none; }
   }
 </style>

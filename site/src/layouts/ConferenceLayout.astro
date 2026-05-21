@@ -1,0 +1,245 @@
+---
+import { url } from '../lib/url';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description } = Astro.props;
+
+const path = Astro.url.pathname.replace(/\/$/, '');
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const nav = [
+  { label: 'Overview', href: '/conference' },
+  { label: 'Program', href: '/conference/program' },
+  { label: 'Abstracts', href: '/conference/abstracts' },
+  { label: 'Presenters', href: '/conference/presenters' },
+  { label: 'Practical info', href: '/conference/info' },
+];
+
+const isCurrent = (href: string) => {
+  const full = url(href).replace(/\/$/, '');
+  return full === path || (href !== '/conference' && path.startsWith(full));
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} · ESPG Conference</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="icon" type="image/svg+xml" href={url('/espg-logo.svg')} />
+    <meta name="generator" content={Astro.generator} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Hanken+Grotesk:wght@400;500;600&display=swap"
+    />
+    <style>
+      :root {
+        --c-bg: #f7f5ee;
+        --c-paper: #fbf9f2;
+        --c-ink: #1a1a1a;
+        --c-ink-soft: #3a3a3a;
+        --c-muted: #6f6a60;
+        --c-rule: #c9c2af;
+        --c-accent: #5e2b1e;
+      }
+      *,
+      *::before,
+      *::after { box-sizing: border-box; }
+      html, body { margin: 0; }
+      body {
+        background: var(--c-bg);
+        color: var(--c-ink);
+        font-family: 'Hanken Grotesk', system-ui, sans-serif;
+        font-size: 17px;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+      a { color: var(--c-accent); text-decoration: none; border-bottom: 1px solid currentColor; }
+      a:hover { color: #371007; }
+
+      .placeholder-banner {
+        background: #efe9d6;
+        border-bottom: 1px solid var(--c-rule);
+        padding: 0.5rem 1rem;
+        font-size: 0.82rem;
+        text-align: center;
+        color: var(--c-muted);
+      }
+      .placeholder-banner strong { color: var(--c-ink); font-weight: 500; }
+      .placeholder-banner a {
+        border: none;
+        color: var(--c-accent);
+        font-weight: 500;
+      }
+
+      header.site {
+        max-width: 76rem;
+        margin: 0 auto;
+        padding: 1.5rem clamp(1.25rem, 4vw, 3rem) 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        border-bottom: 1px solid var(--c-rule);
+      }
+      .brand {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 0.75rem;
+        text-decoration: none;
+        color: var(--c-ink);
+        border: none;
+      }
+      .brand .mark {
+        font-family: 'Newsreader', Georgia, serif;
+        font-variation-settings: 'opsz' 36;
+        font-size: 1.5rem;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+      }
+      .brand .return {
+        font-size: 0.78rem;
+        color: var(--c-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        border-bottom: 1px dotted var(--c-muted);
+      }
+      .brand:hover .return { color: var(--c-accent); border-bottom-color: var(--c-accent); }
+
+      .conf-id {
+        font-family: 'Newsreader', Georgia, serif;
+        font-variation-settings: 'opsz' 36;
+        font-size: 1.2rem;
+        font-style: italic;
+        font-weight: 400;
+        color: var(--c-accent);
+      }
+      .conf-id .year { color: var(--c-muted); font-style: normal; margin-left: 0.5rem; }
+
+      nav.sub {
+        max-width: 76rem;
+        margin: 0 auto;
+        padding: 0.8rem clamp(1.25rem, 4vw, 3rem);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem 1.5rem;
+        border-bottom: 1px solid var(--c-rule);
+        background: var(--c-paper);
+      }
+      nav.sub a {
+        font-size: 0.92rem;
+        border: none;
+        color: var(--c-ink);
+        padding: 0.2rem 0;
+      }
+      nav.sub a:hover { color: var(--c-accent); }
+      nav.sub a[aria-current='page'] {
+        color: var(--c-accent);
+        border-bottom: 1px solid var(--c-accent);
+      }
+
+      main {
+        max-width: 76rem;
+        margin: 0 auto;
+        padding: clamp(2rem, 5vw, 4rem) clamp(1.25rem, 4vw, 3rem);
+        min-height: 60vh;
+      }
+      h1 {
+        font-family: 'Newsreader', Georgia, serif;
+        font-variation-settings: 'opsz' 72;
+        font-weight: 460;
+        font-size: clamp(2.25rem, 5vw, 3.5rem);
+        line-height: 1.05;
+        letter-spacing: -0.015em;
+        margin: 0 0 1.5rem;
+        max-width: 22ch;
+      }
+      h2 {
+        font-family: 'Newsreader', Georgia, serif;
+        font-variation-settings: 'opsz' 36;
+        font-weight: 450;
+        font-size: clamp(1.5rem, 2.5vw, 2rem);
+        line-height: 1.15;
+        margin: 2.5rem 0 1rem;
+      }
+      h3 {
+        font-family: 'Hanken Grotesk', system-ui, sans-serif;
+        font-weight: 500;
+        font-size: 1.1rem;
+        margin: 0 0 0.5rem;
+      }
+      p { margin: 0 0 1rem; max-width: 62ch; }
+      .lede {
+        font-family: 'Newsreader', Georgia, serif;
+        font-variation-settings: 'opsz' 28;
+        font-size: 1.25rem;
+        line-height: 1.4;
+        color: var(--c-ink-soft);
+        font-weight: 360;
+      }
+      .muted { color: var(--c-muted); }
+      .eyebrow {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--c-muted);
+        margin: 0 0 0.5rem;
+      }
+
+      footer.site {
+        max-width: 76rem;
+        margin: 0 auto;
+        padding: 2rem clamp(1.25rem, 4vw, 3rem);
+        border-top: 1px solid var(--c-rule);
+        font-size: 0.85rem;
+        color: var(--c-muted);
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      footer.site a { color: var(--c-ink); border-bottom-color: var(--c-rule); }
+    </style>
+  </head>
+  <body>
+    <div class="placeholder-banner">
+      <strong>Conference site</strong> · visual identity TBD · <a href={url('/')}>society site →</a>
+    </div>
+
+    <header class="site">
+      <a class="brand" href={url('/')}>
+        <span class="mark">ESPG</span>
+        <span class="return">↩ society site</span>
+      </a>
+      <span class="conf-id">Annual Postgraduate Conference<span class="year">2026</span></span>
+    </header>
+
+    <nav class="sub" aria-label="Conference sections">
+      {
+        nav.map((item) => (
+          <a href={url(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site">
+      <span>ESPG Annual Postgraduate Conference · University of Melbourne</span>
+      <a href={url('/')}>← back to society</a>
+    </footer>
+  </body>
+</html>

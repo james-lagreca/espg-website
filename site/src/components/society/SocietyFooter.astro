@@ -1,0 +1,58 @@
+---
+import { url } from '../../lib/url';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="foot-logo" aria-hidden="true">
+    <img src={url('/espg-logo.svg')} alt="" />
+  </div>
+  <div class="foot-text">
+    <p>
+      <strong>ESPG</strong> · Earth Sciences Postgraduate Group · School of Geography, Earth and
+      Atmospheric Sciences · The University of Melbourne · est. 2007 · Affiliated with the UMSU
+      Graduate Student Association.
+    </p>
+    <p>
+      © {year} ESPG. Set in Bricolage Grotesque, Hanken Grotesk and JetBrains Mono. Time scale
+      after the International Chronostratigraphic Chart (ICS 2023).
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: clamp(3rem, 6vw, 5rem);
+    padding-top: 2rem;
+    border-top: 1px solid var(--copper-soft);
+    display: grid;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+    gap: clamp(1.25rem, 3vw, 2rem);
+    align-items: start;
+  }
+  @media (max-width: 720px) {
+    .site-footer { grid-template-columns: 1fr; }
+  }
+  .foot-logo {
+    width: clamp(54px, 6vw, 72px);
+    aspect-ratio: 1;
+    background: var(--bone);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.88;
+  }
+  .foot-logo img { width: 78%; height: 78%; object-fit: contain; }
+  .foot-text p {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    line-height: 1.7;
+    letter-spacing: 0.06em;
+    color: var(--bone-soft);
+    text-transform: uppercase;
+    margin: 0 0 0.4rem;
+    max-width: 90ch;
+  }
+  .foot-text p strong { color: var(--bone); font-weight: 500; }
+</style>

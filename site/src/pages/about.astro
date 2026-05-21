@@ -1,85 +1,133 @@
 ---
 import { getCollection } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
+import SocietyLayout from '../layouts/SocietyLayout.astro';
+import PageHeader from '../components/society/PageHeader.astro';
 
 const committee = (await getCollection('committee')).sort(
   (a, b) => a.data.order - b.data.order,
 );
 ---
 
-<BaseLayout
+<SocietyLayout
   title="About"
   description="The Earth Sciences Postgraduate Group represents HDR students in the School of Geography, Earth and Atmospheric Sciences at the University of Melbourne."
 >
-  <p class="eyebrow">About</p>
-  <h1>About ESPG</h1>
+  <PageHeader
+    eyebrow="About"
+    title="A society for postgraduates in the earth sciences."
+    lede="ESPG represents Masters and PhD students in the School of Geography, Earth and Atmospheric Sciences at the University of Melbourne. We exist to build community across research groups, run social and academic events, and give postgraduates a voice in school-level decisions."
+  />
 
-  <div class="prose">
-    <p class="lede">
-      The Earth Sciences Postgraduate Group represents masters and PhD students in the School of
-      Geography, Earth and Atmospheric Sciences (SGEAS) at the University of Melbourne.
-    </p>
-    <p>
-      We exist to build community across research groups, run social and academic events, and
-      give postgraduates a voice in school-level decisions. Membership is free for any
-      SGEAS-enrolled postgrad. We're affiliated with the UMSU Graduate Student Association.
-    </p>
+  <section class="block">
     <h2>What we do</h2>
-    <ul>
+    <ul class="prose-list">
       <li>An annual postgraduate-led conference for HDR students.</li>
       <li>Regular social events: pub nights, BBQs, weekend field trips.</li>
       <li>Skills sessions and PhD-life discussions across research areas.</li>
       <li>Representation to the school and faculty on student matters.</li>
     </ul>
-  </div>
+  </section>
 
-  <hr />
+  <section class="block">
+    <h2>The committee</h2>
+    <p class="muted">
+      Six elected roles, voted at the AGM each March. All committee members are current
+      postgraduates in SGEAS.
+    </p>
+    {
+      committee.length === 0 ? (
+        <p class="muted">Committee members will be listed here once content is migrated.</p>
+      ) : (
+        <ul class="committee-grid">
+          {committee.map((m) => (
+            <li>
+              <span class="role">{m.data.role}</span>
+              <span class="name">{m.data.name}</span>
+              {m.data.email && (
+                <a class="email" href={`mailto:${m.data.email}`}>
+                  {m.data.email}
+                </a>
+              )}
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </section>
 
-  <h2>Committee</h2>
-  {
-    committee.length === 0 ? (
-      <p class="muted">Committee members will be listed here once content is migrated.</p>
-    ) : (
-      <ul class="committee-grid">
-        {committee.map((m) => (
-          <li class="committee-card">
-            <h3>{m.data.name}</h3>
-            <p class="role muted">{m.data.role}</p>
-            {m.data.email && (
-              <p>
-                <a href={`mailto:${m.data.email}`}>{m.data.email}</a>
-              </p>
-            )}
-          </li>
-        ))}
-      </ul>
-    )
-  }
-</BaseLayout>
+  <section class="block">
+    <h2>Affiliations</h2>
+    <p>
+      ESPG is affiliated with the UMSU Graduate Student Association at the University of
+      Melbourne, and partners with the Geological Society of Australia (Graduate Groups program)
+      for conference and event support.
+    </p>
+  </section>
+</SocietyLayout>
 
 <style>
-  .lede {
-    font-size: 1.15rem;
+  .block {
+    padding: clamp(2rem, 4vw, 3.5rem) 0;
+    border-bottom: 1px solid var(--rule);
   }
+  .block:last-child { border-bottom: none; }
+  .prose-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+    display: grid;
+    gap: 0.6rem;
+    max-width: 60ch;
+  }
+  .prose-list li {
+    padding-left: 1.4rem;
+    position: relative;
+  }
+  .prose-list li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--copper);
+    font-size: 0.85rem;
+    top: 0.15rem;
+  }
+
   .committee-grid {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 1.5rem 0 0;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-    gap: var(--space-4);
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
   }
-  .committee-card {
-    padding: var(--space-3);
-    border: 1px solid var(--color-rule);
-    border-radius: 2px;
+  .committee-grid li {
+    background: var(--bg);
+    padding: 1.25rem 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
   }
-  .committee-card h3 {
-    margin: 0 0 var(--space-1);
+  .committee-grid .role {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--copper);
+  }
+  .committee-grid .name {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 24, 'wdth' 100, 'wght' 500;
     font-size: 1.1rem;
+    letter-spacing: -0.005em;
+    color: var(--bone);
   }
-  .committee-card .role {
-    margin: 0 0 var(--space-2);
-    font-size: 0.9rem;
+  .committee-grid .email {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--bone-soft);
+    margin-top: 0.2rem;
   }
+  .committee-grid .email:hover { color: var(--copper); }
 </style>

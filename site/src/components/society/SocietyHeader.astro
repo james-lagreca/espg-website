@@ -1,0 +1,119 @@
+---
+import { url } from '../../lib/url';
+
+const path = Astro.url.pathname.replace(/\/$/, '');
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const nav = [
+  { label: 'Events', href: '/events' },
+  { label: 'Membership', href: '/membership' },
+  { label: 'About', href: '/about' },
+  { label: 'Conference', href: '/conference' },
+];
+
+const isCurrent = (href: string) => {
+  const full = url(href).replace(/\/$/, '');
+  return full === path || (href !== '/' && path.startsWith(full));
+};
+---
+
+<header class="site-header">
+  <a href={url('/')} class="brand" aria-label="ESPG home">
+    <span class="brand-mark" aria-hidden="true">
+      <img src={url('/espg-logo.svg')} alt="" />
+    </span>
+    <span class="brand-text">ESPG<span class="brand-dot">.</span></span>
+  </a>
+  <nav aria-label="Primary">
+    <ul>
+      {
+        nav.map((item) => (
+          <li>
+            <a
+              href={url(item.href)}
+              aria-current={isCurrent(item.href) ? 'page' : undefined}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1rem 0 1rem;
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+    border-bottom: 1px solid var(--rule);
+    flex-wrap: wrap;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    text-decoration: none;
+    color: inherit;
+  }
+  .brand-mark {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #f7f2e6 0%, #ebe4d2 70%, #d6cdb6 100%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.08),
+      inset 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
+  .brand-mark img {
+    width: 78%;
+    height: 78%;
+    object-fit: contain;
+  }
+  .brand-text {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 36, 'wdth' 100, 'wght' 600;
+    font-size: 1.4rem;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .brand-dot {
+    color: var(--copper);
+    font-style: italic;
+    font-variation-settings: 'opsz' 36, 'wdth' 95, 'wght' 400;
+  }
+  nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  nav a {
+    color: var(--bone);
+    text-decoration: none;
+  }
+  nav a:hover { color: var(--copper); }
+  nav a[aria-current='page'] {
+    color: var(--copper);
+  }
+  nav a[aria-current='page']::before {
+    content: '● ';
+    color: var(--copper);
+    font-size: 0.6rem;
+    margin-right: 0.2rem;
+    vertical-align: 2px;
+  }
+</style>

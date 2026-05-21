@@ -1,7 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
-import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { url } from '../../../lib/url';
+import ConferenceLayout from '../../../layouts/ConferenceLayout.astro';
 
 export async function getStaticPaths() {
   const entries = await getCollection('presenters');
@@ -20,27 +19,16 @@ const roleLabel: Record<string, string> = {
 };
 ---
 
-<BaseLayout title={entry.data.name} description={`${roleLabel[entry.data.role]} — ${entry.data.affiliation}`}>
-  <p class="eyebrow">
-    <a href={url('/conference/presenters')}>Presenters</a>
-  </p>
+<ConferenceLayout title={entry.data.name} description={`${roleLabel[entry.data.role]} — ${entry.data.affiliation}`}>
+  <p class="eyebrow">{roleLabel[entry.data.role]}</p>
   <h1>{entry.data.name}</h1>
-  <p class="role">
-    <span class="eyebrow">{roleLabel[entry.data.role]}</span>
-    <span class="muted">{entry.data.affiliation}</span>
-  </p>
+  <p class="lede muted">{entry.data.affiliation}</p>
 
   <div class="prose">
     <Content />
   </div>
-</BaseLayout>
+</ConferenceLayout>
 
 <style>
-  .role {
-    margin: 0 0 var(--space-4);
-  }
-  .role .eyebrow {
-    display: inline;
-    margin-right: var(--space-3);
-  }
+  .prose p { font-size: 1.02rem; max-width: 62ch; }
 </style>

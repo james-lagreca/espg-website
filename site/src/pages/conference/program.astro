@@ -1,13 +1,12 @@
 ---
 import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import ConferenceLayout from '../../layouts/ConferenceLayout.astro';
 import { url } from '../../lib/url';
 
 const items = (await getCollection('agenda')).sort((a, b) => {
   if (a.data.day !== b.data.day) return a.data.day.localeCompare(b.data.day);
   return a.data.time.localeCompare(b.data.time);
 });
-
 const days = [...new Set(items.map((i) => i.data.day))];
 
 const typeLabel: Record<string, string> = {
@@ -20,14 +19,15 @@ const typeLabel: Record<string, string> = {
 };
 ---
 
-<BaseLayout
+<ConferenceLayout
   title="Program"
   description="Full program for the ESPG Annual Postgraduate Conference, including sessions, talks, breaks and social events."
 >
-  <p class="eyebrow">
-    <a href={url('/conference')}>Conference</a>
+  <p class="eyebrow">Program</p>
+  <h1>Program.</h1>
+  <p class="lede">
+    Three days of HDR-led talks, invited keynotes, posters, and social events.
   </p>
-  <h1>Program</h1>
 
   {
     items.length === 0 ? (
@@ -39,10 +39,10 @@ const typeLabel: Record<string, string> = {
           <table class="agenda">
             <thead>
               <tr>
-                <th scope="col">Time</th>
-                <th scope="col">Item</th>
-                <th scope="col">Presenter</th>
-                <th scope="col">Room</th>
+                <th>Time</th>
+                <th>Item</th>
+                <th>Presenter</th>
+                <th>Room</th>
               </tr>
             </thead>
             <tbody>
@@ -52,7 +52,8 @@ const typeLabel: Record<string, string> = {
                   <tr class={`type-${i.data.type}`}>
                     <td class="time">{i.data.time}</td>
                     <td>
-                      <span class={`badge badge-${i.data.type}`}>{typeLabel[i.data.type]}</span>{' '}
+                      <span class={`badge badge-${i.data.type}`}>{typeLabel[i.data.type]}</span>
+                      {' '}
                       {i.data.abstract ? (
                         <a href={url(`/conference/abstracts/${i.data.abstract}`)}>{i.data.title}</a>
                       ) : (
@@ -69,12 +70,10 @@ const typeLabel: Record<string, string> = {
       ))
     )
   }
-</BaseLayout>
+</ConferenceLayout>
 
 <style>
-  .day + .day {
-    margin-top: var(--space-5);
-  }
+  .day + .day { margin-top: 3rem; }
   .agenda {
     width: 100%;
     border-collapse: collapse;
@@ -83,30 +82,28 @@ const typeLabel: Record<string, string> = {
   .agenda th,
   .agenda td {
     text-align: left;
-    padding: var(--space-2) var(--space-3) var(--space-2) 0;
-    border-bottom: 1px solid var(--color-rule);
+    padding: 0.65rem 1rem 0.65rem 0;
+    border-bottom: 1px solid var(--c-rule);
     vertical-align: top;
   }
   .agenda th {
     font-weight: 500;
-    color: var(--color-muted);
-    font-size: 0.78rem;
+    color: var(--c-muted);
+    font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
   }
   .time {
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
-    color: var(--color-muted);
+    color: var(--c-muted);
   }
   .type-break,
   .type-lunch,
-  .type-social {
-    background: rgba(0, 0, 0, 0.02);
-  }
+  .type-social { background: rgba(0, 0, 0, 0.02); }
   .type-session-header td {
     font-weight: 600;
-    background: rgba(58, 77, 42, 0.05);
+    background: rgba(94, 43, 30, 0.05);
   }
   .badge {
     display: inline-block;
@@ -115,26 +112,14 @@ const typeLabel: Record<string, string> = {
     letter-spacing: 0.08em;
     padding: 1px 6px;
     border-radius: 2px;
-    background: var(--color-rule);
-    color: var(--color-fg);
-    margin-right: var(--space-2);
+    background: var(--c-rule);
+    color: var(--c-ink);
+    margin-right: 0.5rem;
     vertical-align: 2px;
   }
-  .badge-keynote {
-    background: var(--color-accent);
-    color: #fff;
-  }
-  .badge-talk {
-    background: rgba(58, 77, 42, 0.15);
-  }
-  .badge-session-header {
-    background: var(--color-accent);
-    color: #fff;
-  }
+  .badge-keynote, .badge-session-header { background: var(--c-accent); color: #fbf9f2; }
+  .badge-talk { background: rgba(94, 43, 30, 0.15); }
   @media (max-width: 720px) {
-    .agenda th:nth-child(4),
-    .agenda td:nth-child(4) {
-      display: none;
-    }
+    .agenda th:nth-child(4), .agenda td:nth-child(4) { display: none; }
   }
 </style>

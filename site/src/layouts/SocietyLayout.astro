@@ -1,0 +1,67 @@
+---
+import '../styles/tokens.css';
+import GeoTimeScale from '../components/society/GeoTimeScale.astro';
+import SocietyHeader from '../components/society/SocietyHeader.astro';
+import SocietyFooter from '../components/society/SocietyFooter.astro';
+import { url } from '../lib/url';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** When true, header + footer are still rendered but with no top border/margin between header and content (used for the home page hero). */
+  bleed?: boolean;
+}
+const { title, description, bleed = false } = Astro.props;
+
+const siteName = 'ESPG — Earth Sciences Postgraduate Group';
+const fullTitle = title === siteName ? title : `${title} · ESPG`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="icon" type="image/svg+xml" href={url('/espg-logo.svg')} />
+    <meta name="generator" content={Astro.generator} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Hanken+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+  </head>
+  <body>
+    <a href="#main" class="skip">Skip to content</a>
+
+    <GeoTimeScale />
+
+    <div class="page-shell" data-bleed={bleed ? 'true' : 'false'}>
+      <SocietyHeader />
+      <main id="main" class={bleed ? 'main main--bleed' : 'main'}>
+        <slot />
+      </main>
+      <SocietyFooter />
+    </div>
+
+    <style>
+      .page-shell {
+        position: relative;
+        z-index: 1;
+        max-width: var(--page-max);
+        margin: 0 auto;
+        padding: 0 clamp(1.5rem, 4vw, 3rem) 4rem calc(var(--time-col) + clamp(1.5rem, 3vw, 2.5rem));
+      }
+      .page-shell[data-bleed='true'] .main { padding-top: 0; }
+      .main { padding-top: 0; }
+      @media (max-width: 860px) {
+        .page-shell {
+          padding-left: clamp(1.25rem, 5vw, 2rem);
+        }
+      }
+    </style>
+  </body>
+</html>
