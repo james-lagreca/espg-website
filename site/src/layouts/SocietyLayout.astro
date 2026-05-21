@@ -36,22 +36,17 @@ const fullTitle = title === siteName ? title : `${title} · ESPG`;
   <body>
     <a href="#main" class="skip">Skip to content</a>
 
-    <div class="layout-frame">
-      <GeoTimeScale />
-      <div class="page-shell" data-bleed={bleed ? 'true' : 'false'}>
-        <SocietyHeader />
-        <main id="main" class={bleed ? 'main main--bleed' : 'main'}>
-          <slot />
-        </main>
-        <SocietyFooter />
-      </div>
+    <GeoTimeScale />
+
+    <div class="page-shell" data-bleed={bleed ? 'true' : 'false'}>
+      <SocietyHeader />
+      <main id="main" class={bleed ? 'main main--bleed' : 'main'}>
+        <slot />
+      </main>
+      <SocietyFooter />
     </div>
 
     <style>
-      .layout-frame {
-        position: relative;
-        min-height: 100vh;
-      }
       .page-shell {
         position: relative;
         z-index: 1;

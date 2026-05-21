@@ -2,8 +2,10 @@
 import SocietyLayout from '../layouts/SocietyLayout.astro';
 import PageHeader from '../components/society/PageHeader.astro';
 
-// TODO Phase 5: replace with real Google Form embed URL
-const formEmbedUrl: string | null = null;
+// Google Form for membership sign-up. Use the ?embedded=true variant so it
+// renders without Google's outer chrome inside our iframe.
+const formEmbedUrl: string | null =
+  'https://docs.google.com/forms/d/e/1FAIpQLScVkYv6kWXxr8R0CGh1MuKfX7qMSuNhs_nvjq2OJ6Xya4wwKA/viewform?embedded=true';
 ---
 
 <SocietyLayout
