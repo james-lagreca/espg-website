@@ -6,9 +6,9 @@ backend:
   name: github
   repo: james-lagreca/espg-website
   branch: main
-  # Cloudflare Worker OAuth proxy. Replace once you've deployed
-  # the worker from docs/cf-worker-oauth.js per docs/decap-cms-setup.md.
-  base_url: https://espg-oauth.PLACEHOLDER.workers.dev
+  # Cloudflare Worker OAuth proxy.
+  # Source: oauth-worker/src/index.js. Deployed via `npx wrangler deploy`.
+  base_url: https://espg-oauth.james-lagreca.workers.dev
   auth_endpoint: auth
 
 # Allow local editing via `npx decap-server` running on localhost:8081.
