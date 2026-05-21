@@ -1,23 +1,42 @@
 ---
 import { url } from '../../lib/url';
 
+// Upcoming events — full register
 const events = [
-  { depth: '00.15', date: '15 Jul', year: '26', day: 'Wed', title: 'Welcome BBQ', loc: 'South Lawn · Parkville', kind: 'Social' },
-  { depth: '02.40', date: '12 Sep', year: '26', day: 'Sat', title: 'Field trip — Otway Ranges', loc: 'Victoria · 2 days', kind: 'Field' },
-  { depth: '03.85', date: '18 Oct', year: '26', day: 'Sun', title: 'Annual Postgraduate Conference', loc: 'Parkville · 3 days', kind: 'Conference' },
-  { depth: '05.10', date: '14 Nov', year: '26', day: 'Sat', title: 'Reading group — neotectonics', loc: 'McCoy Building', kind: 'Academic' },
-  { depth: '06.75', date: '06 Dec', year: '26', day: 'Sun', title: 'End-of-year dinner', loc: 'Lygon St · TBC', kind: 'Social' },
+  { date: '2026-07-15', dd: '15', mo: 'Jul', wd: 'Wed', title: 'Welcome BBQ',                       loc: 'South Lawn · Parkville',     kind: 'Social'     },
+  { date: '2026-08-22', dd: '22', mo: 'Aug', wd: 'Sat', title: 'Pub night & cohort mixer',          loc: 'Naughtons Hotel · Carlton',  kind: 'Social'     },
+  { date: '2026-09-12', dd: '12', mo: 'Sep', wd: 'Sat', title: 'Field trip — Otway Ranges',         loc: 'Otway Ranges · 2 days',      kind: 'Field'      },
+  { date: '2026-10-18', dd: '18', mo: 'Oct', wd: 'Sun', title: 'Annual Postgraduate Conference',    loc: 'Parkville · 3 days',         kind: 'Conference' },
+  { date: '2026-11-14', dd: '14', mo: 'Nov', wd: 'Sat', title: 'Reading group — neotectonics',      loc: 'McCoy Building',             kind: 'Academic'   },
+  { date: '2026-12-06', dd: '06', mo: 'Dec', wd: 'Sun', title: 'End-of-year dinner',                loc: 'Lygon St · TBC',             kind: 'Social'     },
 ];
 
-// Strata bands shown in the core column
-const strata = [
-  { depth: 0, color: '#c46a2e', label: '00.00' },
-  { depth: 16, color: '#7a4818', label: '01.50' },
-  { depth: 32, color: '#3d4a2a', label: '03.00' },
-  { depth: 50, color: '#5a5246', label: '05.20' },
-  { depth: 68, color: '#2a322e', label: '06.80' },
-  { depth: 85, color: '#1a1c1a', label: '08.40' },
+// Featured (most-immediate three for the masthead strip)
+const featured = events.slice(0, 3);
+
+/**
+ * International Chronostratigraphic Chart (ICS 2023) — colours and bounds.
+ * Proportional thickness: total = 4567 Ma (Hadean start).
+ * Stored as % FROM TOP (where 0 = now, 100 = formation of Earth).
+ */
+const timeScale = [
+  // Phanerozoic — eras
+  { kind: 'era', name: 'Cenozoic',    fromMa:   66.0, toMa:    0.0, color: '#F2F91D' },
+  { kind: 'era', name: 'Mesozoic',    fromMa:  251.9, toMa:   66.0, color: '#67C5CA' },
+  { kind: 'era', name: 'Paleozoic',   fromMa:  538.8, toMa:  251.9, color: '#99C08D' },
+  // Pre-Phanerozoic — eons
+  { kind: 'eon', name: 'Proterozoic', fromMa: 2500.0, toMa:  538.8, color: '#F73DC2' },
+  { kind: 'eon', name: 'Archean',     fromMa: 4000.0, toMa: 2500.0, color: '#F0047F' },
+  { kind: 'eon', name: 'Hadean',      fromMa: 4567.0, toMa: 4000.0, color: '#AB145A' },
 ];
+const TOTAL_MA = 4567.0;
+// Pre-compute % positions
+const bands = timeScale.map((t) => ({
+  ...t,
+  topPct: (t.toMa / TOTAL_MA) * 100,
+  bottomPct: (t.fromMa / TOTAL_MA) * 100,
+  heightPct: ((t.fromMa - t.toMa) / TOTAL_MA) * 100,
+}));
 ---
 
 <!doctype html>
@@ -25,7 +44,8 @@ const strata = [
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ESPG · Direction B — Stratigraphic Modern</title>
+    <title>ESPG · Direction B (v2) — Stratigraphic Modern</title>
+    <link rel="icon" type="image/svg+xml" href={url('/espg-logo.svg')} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -37,15 +57,21 @@ const strata = [
         --bg: #18191a;
         --bg-warm: #1d1e1c;
         --bg-cool: #161819;
+        --bg-card: #1f2122;
         --bone: #e6e1d6;
         --bone-soft: #a6a097;
         --muted: #6a655c;
         --copper: #d07636;
         --copper-soft: #9a5526;
+        --copper-bright: #e88a45;
         --moss: #4a5c33;
         --rule: #2e2f30;
         --rule-warm: #3a3530;
+
+        /* Layout */
+        --time-col: 7.5rem; /* total width allotted to the time scale column */
       }
+
       *,
       *::before,
       *::after { box-sizing: border-box; }
@@ -67,16 +93,15 @@ const strata = [
         position: fixed;
         inset: 0;
         pointer-events: none;
-        opacity: 0.55;
+        opacity: 0.5;
         z-index: 0;
         background-image:
-          radial-gradient(ellipse 80% 60% at 20% 40%, transparent 30%, rgba(208, 118, 54, 0.04) 30.3%, transparent 30.6%),
-          radial-gradient(ellipse 80% 60% at 20% 40%, transparent 40%, rgba(208, 118, 54, 0.035) 40.3%, transparent 40.6%),
-          radial-gradient(ellipse 80% 60% at 20% 40%, transparent 50%, rgba(208, 118, 54, 0.03) 50.3%, transparent 50.6%),
-          radial-gradient(ellipse 80% 60% at 20% 40%, transparent 60%, rgba(208, 118, 54, 0.025) 60.3%, transparent 60.6%),
-          radial-gradient(ellipse 80% 60% at 80% 70%, transparent 25%, rgba(74, 92, 51, 0.04) 25.3%, transparent 25.6%),
-          radial-gradient(ellipse 80% 60% at 80% 70%, transparent 35%, rgba(74, 92, 51, 0.035) 35.3%, transparent 35.6%),
-          radial-gradient(ellipse 80% 60% at 80% 70%, transparent 45%, rgba(74, 92, 51, 0.03) 45.3%, transparent 45.6%);
+          radial-gradient(ellipse 80% 60% at 25% 35%, transparent 30%, rgba(208, 118, 54, 0.045) 30.3%, transparent 30.6%),
+          radial-gradient(ellipse 80% 60% at 25% 35%, transparent 40%, rgba(208, 118, 54, 0.04)  40.3%, transparent 40.6%),
+          radial-gradient(ellipse 80% 60% at 25% 35%, transparent 50%, rgba(208, 118, 54, 0.035) 50.3%, transparent 50.6%),
+          radial-gradient(ellipse 80% 60% at 75% 75%, transparent 25%, rgba(74, 92, 51, 0.045)  25.3%, transparent 25.6%),
+          radial-gradient(ellipse 80% 60% at 75% 75%, transparent 35%, rgba(74, 92, 51, 0.04)   35.3%, transparent 35.6%),
+          radial-gradient(ellipse 80% 60% at 75% 75%, transparent 45%, rgba(74, 92, 51, 0.035)  45.3%, transparent 45.6%);
       }
 
       a {
@@ -86,7 +111,7 @@ const strata = [
       }
       a:hover { color: var(--copper); }
 
-      /* Top utility bar */
+      /* TOP UTILITY BAR */
       .util {
         position: fixed;
         top: 0;
@@ -95,361 +120,310 @@ const strata = [
         z-index: 60;
         display: flex;
         justify-content: space-between;
-        padding: 1rem clamp(1.25rem, 4vw, 3rem) 1rem clamp(4rem, 6vw, 5rem);
+        gap: 1rem;
+        padding: 0.9rem clamp(1.25rem, 4vw, 3rem) 0.9rem calc(var(--time-col) + 1rem);
         font-family: 'JetBrains Mono', ui-monospace, monospace;
         font-size: 0.7rem;
         letter-spacing: 0.14em;
         text-transform: uppercase;
         color: var(--bone-soft);
-        background: linear-gradient(to bottom, var(--bg) 60%, transparent);
+        background: linear-gradient(to bottom, rgba(24,25,26,0.92) 50%, transparent);
         pointer-events: none;
+        backdrop-filter: blur(2px);
       }
       .util a { color: var(--bone-soft); pointer-events: auto; }
       .util a:hover { color: var(--copper); }
       .util .dot {
         display: inline-block;
-        width: 8px;
-        height: 8px;
+        width: 7px;
+        height: 7px;
         border-radius: 50%;
         background: var(--copper);
         margin-right: 0.5rem;
         vertical-align: 1px;
-        box-shadow: 0 0 12px var(--copper);
+        box-shadow: 0 0 10px var(--copper);
       }
 
-      /* The CORE — vertical stratigraphic column down the left edge */
-      .core {
+      /* === GEOLOGICAL TIME SCALE COLUMN (fixed, left edge) === */
+      .gts {
         position: fixed;
-        left: clamp(1rem, 2.5vw, 2rem);
+        left: 0;
         top: 0;
         bottom: 0;
-        width: 14px;
+        width: var(--time-col);
         z-index: 40;
         pointer-events: none;
+        padding: 1rem 0.75rem 1.25rem 1rem;
+        display: flex;
+        gap: 0.6rem;
+        border-right: 1px solid var(--rule);
+        background: linear-gradient(to right, rgba(0,0,0,0.25), transparent);
       }
-      .core .strata {
-        position: absolute;
-        inset: 0;
+      .gts-col {
+        position: relative;
+        width: 22px;
+        flex: 0 0 22px;
         border: 1px solid var(--rule-warm);
-        background: linear-gradient(
-          to bottom,
-          #c46a2e 0% 8%,
-          #7a4818 8% 14%,
-          #5a3a16 14% 22%,
-          #3d4a2a 22% 32%,
-          #5a5246 32% 42%,
-          #4a3f33 42% 52%,
-          #3d362e 52% 64%,
-          #2a322e 64% 75%,
-          #1f2522 75% 86%,
-          #14171a 86% 100%
-        );
+        background: var(--bg-cool);
+        overflow: hidden;
       }
-      .core::after {
-        /* Horizontal bedding lines */
+      .gts-band {
+        position: absolute;
+        left: 0;
+        right: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .gts-band::after {
+        /* horizontal hairline at boundary */
         content: '';
         position: absolute;
-        inset: 1px;
-        background-image: repeating-linear-gradient(
-          to bottom,
-          transparent 0,
-          transparent 22px,
-          rgba(0, 0, 0, 0.5) 22px,
-          rgba(0, 0, 0, 0.5) 23px
-        );
-      }
-      .core-labels {
-        position: fixed;
-        left: clamp(2.5rem, 4.5vw, 4rem);
+        left: -2px;
+        right: -2px;
         top: 0;
-        bottom: 0;
-        width: 4rem;
-        z-index: 41;
-        pointer-events: none;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding: 6rem 0 3rem;
+        height: 1px;
+        background: rgba(0,0,0,0.35);
+      }
+      .gts-band:first-child::after { display: none; }
+
+      /* "You are here" marker — at the very top of the column (now) */
+      .gts-now {
+        position: absolute;
+        left: -10px;
+        top: 0;
+        width: 16px;
+        height: 16px;
+        background: var(--copper);
+        border: 2px solid var(--bg);
+        border-radius: 50%;
+        box-shadow: 0 0 14px var(--copper);
+        z-index: 2;
+        animation: pulse 2.4s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { box-shadow: 0 0 10px rgba(208,118,54,0.6); }
+        50%      { box-shadow: 0 0 22px rgba(208,118,54,0.95); }
+      }
+
+      .gts-labels {
+        position: relative;
+        flex: 1;
         font-family: 'JetBrains Mono', ui-monospace, monospace;
-        font-size: 0.62rem;
-        letter-spacing: 0.1em;
+        font-size: 0.6rem;
+        line-height: 1.25;
+        letter-spacing: 0.05em;
         color: var(--bone-soft);
       }
-      .core-labels span {
-        position: relative;
-        padding-left: 0.5rem;
+      .gts-label {
+        position: absolute;
+        left: 0;
+        right: 0;
+        padding-left: 0.4rem;
+        transform: translateY(-50%); /* anchor at vertical centre of band */
       }
-      .core-labels span::before {
+      .gts-label .nm {
+        display: block;
+        color: var(--bone);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 0.62rem;
+        font-weight: 500;
+      }
+      .gts-label .age {
+        display: block;
+        color: var(--muted);
+        font-size: 0.58rem;
+        margin-top: 1px;
+      }
+      .gts-label::before {
+        /* leader line back to the band */
         content: '';
         position: absolute;
-        left: -8px;
+        left: -0.6rem;
         top: 50%;
-        width: 6px;
+        width: 0.4rem;
         height: 1px;
-        background: var(--bone-soft);
+        background: var(--rule);
+      }
+      .gts-now-label {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        padding-left: 0.4rem;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.6rem;
+        line-height: 1.1;
+        color: var(--copper);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .gts-now-label .yr {
+        display: block;
+        color: var(--bone-soft);
+        text-transform: none;
+        letter-spacing: 0.04em;
+        margin-top: 1px;
+      }
+      .gts-footer {
+        position: absolute;
+        left: 1rem;
+        right: 0.75rem;
+        bottom: 0.5rem;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.55rem;
+        line-height: 1.3;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        text-transform: uppercase;
       }
 
-      @media (max-width: 720px) {
-        .core, .core-labels { display: none; }
+      @media (max-width: 860px) {
+        :root { --time-col: 0; }
+        .gts { display: none; }
+        .util { padding-left: 1.25rem; }
       }
 
-      /* Page frame */
+      /* === PAGE === */
       .page {
         position: relative;
         z-index: 1;
         max-width: 80rem;
         margin: 0 auto;
-        padding: clamp(5rem, 10vh, 8rem) clamp(1.5rem, 4vw, 3rem) 4rem clamp(7rem, 11vw, 10rem);
+        padding: 0 clamp(1.5rem, 4vw, 3rem) 4rem calc(var(--time-col) + clamp(1.5rem, 3vw, 2.5rem));
       }
+      @media (max-width: 860px) { .page { padding-left: clamp(1.25rem, 5vw, 2rem); padding-top: 3.5rem; } }
 
-      @media (max-width: 720px) {
-        .page {
-          padding-left: clamp(1.25rem, 5vw, 2rem);
-        }
+      /* === MASTHEAD === */
+      .mast {
+        padding: clamp(3.5rem, 7vw, 5rem) 0 clamp(2rem, 4vw, 3rem);
+        border-bottom: 1px solid var(--rule);
       }
-
-      /* SECTION STRATA */
-      section {
+      .mast-top {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(0, 1fr) minmax(0, auto);
+        gap: clamp(1.25rem, 3vw, 2.5rem);
+        align-items: center;
+      }
+      .specimen {
         position: relative;
-        padding: clamp(3rem, 7vw, 6rem) 0;
-        border-top: 1px solid var(--rule);
+        width: clamp(74px, 9vw, 104px);
+        aspect-ratio: 1;
+        flex: 0 0 auto;
       }
-      section:first-of-type { border-top: none; padding-top: 0; }
-      section.warm { background: var(--bg-warm); margin: 0 calc(-1 * clamp(1.5rem, 4vw, 3rem)); padding-left: clamp(1.5rem, 4vw, 3rem); padding-right: clamp(1.5rem, 4vw, 3rem); }
-      section.cool { background: var(--bg-cool); margin: 0 calc(-1 * clamp(1.5rem, 4vw, 3rem)); padding-left: clamp(1.5rem, 4vw, 3rem); padding-right: clamp(1.5rem, 4vw, 3rem); }
+      .specimen::before {
+        content: '';
+        position: absolute;
+        inset: -8px;
+        border-radius: 50%;
+        border: 1px solid var(--rule-warm);
+      }
+      .specimen-disc {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 30%, #f7f2e6 0%, #ebe4d2 70%, #d6cdb6 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+          inset 0 0 0 1px rgba(0,0,0,0.06),
+          inset 0 6px 18px rgba(0,0,0,0.08),
+          0 8px 32px rgba(0,0,0,0.35);
+      }
+      .specimen-disc img {
+        width: 78%;
+        height: 78%;
+        object-fit: contain;
+        display: block;
+      }
+      .specimen-label {
+        position: absolute;
+        left: 50%;
+        bottom: -1.8rem;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.58rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
 
-      .stratum-tag {
+      .mast-text { min-width: 0; }
+      .mast-eyebrow {
         display: inline-flex;
         align-items: center;
-        gap: 0.6rem;
+        gap: 0.5rem;
         font-family: 'JetBrains Mono', ui-monospace, monospace;
         font-size: 0.7rem;
         letter-spacing: 0.18em;
         text-transform: uppercase;
         color: var(--copper);
-        margin-bottom: clamp(1rem, 2vw, 1.5rem);
+        margin-bottom: 0.6rem;
       }
-      .stratum-tag::before {
+      .mast-eyebrow::before {
         content: '';
         display: inline-block;
-        width: 2rem;
+        width: 1.6rem;
         height: 1px;
         background: var(--copper);
       }
-
-      /* HERO */
-      .hero h1 {
+      h1.wordmark {
         font-family: 'Bricolage Grotesque', system-ui, sans-serif;
         font-variation-settings: 'opsz' 96, 'wdth' 100, 'wght' 600;
-        font-size: clamp(3.5rem, 12vw, 9rem);
-        line-height: 0.88;
-        letter-spacing: -0.045em;
-        margin: 0 0 1.75rem;
-        max-width: 14ch;
+        font-size: clamp(2.2rem, 5.6vw, 4.2rem);
+        line-height: 0.95;
+        letter-spacing: -0.035em;
+        margin: 0 0 0.4rem;
       }
-      .hero h1 .ital {
+      h1.wordmark .ital {
         font-style: italic;
         font-variation-settings: 'opsz' 96, 'wdth' 95, 'wght' 400;
         color: var(--copper);
       }
-      .hero h1 .stack { display: block; }
-      .hero h1 .compressed {
-        font-variation-settings: 'opsz' 96, 'wdth' 75, 'wght' 700;
-        letter-spacing: -0.03em;
-      }
-      .hero .lede {
-        font-size: clamp(1.1rem, 1.5vw, 1.3rem);
-        max-width: 48ch;
-        line-height: 1.45;
-        color: var(--bone);
-        margin: 0 0 2.5rem;
-        font-weight: 400;
-      }
-      .hero .lede strong {
-        color: var(--copper);
-        font-weight: 500;
-      }
-
-      .hero-meta {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-        gap: clamp(1.5rem, 3vw, 2.5rem);
-        padding: 1.5rem 0;
-        border-top: 1px solid var(--rule-warm);
-        border-bottom: 1px solid var(--rule-warm);
-      }
-      .hero-meta .cell {
-        font-family: 'JetBrains Mono', ui-monospace, monospace;
-        font-size: 0.72rem;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: var(--bone-soft);
-        line-height: 1.5;
-      }
-      .hero-meta .cell strong {
-        display: block;
+      .mast-sub {
         font-family: 'Bricolage Grotesque', system-ui, sans-serif;
-        font-variation-settings: 'opsz' 36, 'wdth' 100, 'wght' 500;
-        font-size: 1.6rem;
-        letter-spacing: -0.01em;
-        text-transform: none;
-        color: var(--bone);
-        margin-bottom: 0.25rem;
-      }
-      .hero-meta .cell strong em {
-        font-style: italic;
-        color: var(--copper);
-        font-variation-settings: 'opsz' 36, 'wdth' 95, 'wght' 400;
-      }
-
-      h2 {
-        font-family: 'Bricolage Grotesque', system-ui, sans-serif;
-        font-variation-settings: 'opsz' 60, 'wdth' 100, 'wght' 500;
-        font-size: clamp(2rem, 4vw, 3.25rem);
-        line-height: 0.98;
-        letter-spacing: -0.025em;
-        margin: 0 0 1.25rem;
-        max-width: 22ch;
-      }
-      h2 em {
-        font-style: italic;
-        font-variation-settings: 'opsz' 60, 'wdth' 95, 'wght' 400;
-        color: var(--copper);
-      }
-
-      p { margin: 0 0 1.1rem; max-width: 58ch; }
-      .muted { color: var(--bone-soft); }
-
-      /* Events table */
-      .strata-list {
-        margin-top: 2rem;
-        border-top: 1px solid var(--rule);
-      }
-      .strata-list li {
-        list-style: none;
-        display: grid;
-        grid-template-columns: minmax(0, 6ch) minmax(0, 11ch) minmax(0, 1fr) minmax(0, 8ch);
-        gap: clamp(0.75rem, 2vw, 1.75rem);
-        padding: 1.4rem 0;
-        border-bottom: 1px solid var(--rule);
-        align-items: center;
-      }
-      .strata-list li:hover { background: rgba(208, 118, 54, 0.04); }
-      .s-depth {
-        font-family: 'JetBrains Mono', ui-monospace, monospace;
-        font-size: 0.78rem;
-        color: var(--copper);
+        font-variation-settings: 'opsz' 24, 'wdth' 90, 'wght' 400;
+        font-size: clamp(0.95rem, 1.4vw, 1.1rem);
         letter-spacing: 0.04em;
-      }
-      .s-date {
-        font-family: 'JetBrains Mono', ui-monospace, monospace;
-        font-size: 0.85rem;
-        color: var(--bone-soft);
-        letter-spacing: 0.02em;
-        line-height: 1.3;
-      }
-      .s-date .yr { color: var(--muted); font-size: 0.78rem; }
-      .s-title {
-        font-family: 'Bricolage Grotesque', system-ui, sans-serif;
-        font-variation-settings: 'opsz' 24, 'wdth' 100, 'wght' 500;
-        font-size: clamp(1.05rem, 1.4vw, 1.2rem);
-        letter-spacing: -0.01em;
-        line-height: 1.2;
-      }
-      .s-title .loc {
-        display: block;
-        font-family: 'Hanken Grotesk', system-ui, sans-serif;
-        font-variation-settings: normal;
-        font-size: 0.85rem;
-        color: var(--bone-soft);
-        font-weight: 400;
-        margin-top: 0.2rem;
-      }
-      .s-kind {
-        text-align: right;
-        font-family: 'JetBrains Mono', ui-monospace, monospace;
-        font-size: 0.7rem;
-        letter-spacing: 0.12em;
         text-transform: uppercase;
         color: var(--bone-soft);
-      }
-
-      @media (max-width: 720px) {
-        .strata-list li {
-          grid-template-columns: minmax(0, 6ch) 1fr;
-          row-gap: 0.4rem;
-        }
-        .s-date { grid-column: 2; }
-        .s-title { grid-column: 1 / -1; }
-        .s-kind { grid-column: 1 / -1; text-align: left; }
-      }
-
-      /* Conference block */
-      .conf-grid {
-        display: grid;
-        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-        gap: clamp(2rem, 5vw, 4rem);
-        align-items: start;
-      }
-      @media (max-width: 720px) { .conf-grid { grid-template-columns: 1fr; } }
-      .conf-card {
-        padding: clamp(1.5rem, 3vw, 2.5rem);
-        border: 1px solid var(--rule-warm);
-        background: linear-gradient(180deg, rgba(208, 118, 54, 0.08), transparent 80%);
-        position: relative;
-      }
-      .conf-card::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 3px;
-        background: var(--copper);
-      }
-      .conf-card dl {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-        gap: 0.75rem 1.5rem;
         margin: 0;
-        font-size: 0.92rem;
-      }
-      .conf-card dt {
-        font-family: 'JetBrains Mono', ui-monospace, monospace;
-        font-size: 0.7rem;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--bone-soft);
-        align-self: center;
-      }
-      .conf-card dd { margin: 0; color: var(--bone); }
-      .conf-card dd strong {
-        font-family: 'Bricolage Grotesque', system-ui, sans-serif;
-        font-variation-settings: 'opsz' 24, 'wdth' 100, 'wght' 500;
-        font-size: 1.1rem;
-        letter-spacing: -0.005em;
-        color: var(--copper);
       }
 
-      /* CTA */
+      .mast-cta {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.5rem;
+      }
+      @media (max-width: 720px) {
+        .mast-top { grid-template-columns: minmax(0, auto) minmax(0, 1fr); }
+        .mast-cta { grid-column: 1 / -1; align-items: stretch; flex-direction: row; }
+      }
+
       .cta {
         display: inline-flex;
         align-items: center;
-        gap: 0.7rem;
-        padding: 0.95rem 1.4rem;
+        gap: 0.65rem;
+        padding: 0.85rem 1.3rem;
         background: var(--copper);
-        color: var(--bg);
+        color: #18191a;
         font-family: 'JetBrains Mono', ui-monospace, monospace;
         font-size: 0.78rem;
         letter-spacing: 0.14em;
         text-transform: uppercase;
+        font-weight: 500;
         border: none;
-        margin-top: 0.5rem;
         transition: background 200ms ease, transform 200ms ease;
+        white-space: nowrap;
       }
       .cta:hover {
-        background: var(--bone);
-        color: var(--bg);
+        background: var(--copper-bright);
+        color: #18191a;
         transform: translateY(-1px);
       }
       .cta--ghost {
@@ -462,70 +436,383 @@ const strata = [
         color: var(--copper);
         border-color: var(--copper);
       }
-      .arrow {
-        display: inline-block;
-        transition: transform 200ms ease;
-      }
+      .cta .arrow { transition: transform 200ms ease; }
       .cta:hover .arrow { transform: translateX(4px); }
+      .cta-aside {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.66rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
 
-      /* Committee */
+      .mast-lede {
+        margin: clamp(1.5rem, 3vw, 2.5rem) 0 0;
+        font-size: clamp(1.05rem, 1.45vw, 1.25rem);
+        line-height: 1.45;
+        max-width: 58ch;
+        color: var(--bone);
+      }
+      .mast-lede strong { color: var(--copper); font-weight: 500; }
+
+      .mast-nav {
+        margin-top: clamp(1.5rem, 3vw, 2.5rem);
+        padding: 0.9rem 0;
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem 1.75rem;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.78rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .mast-nav a { color: var(--bone); }
+      .mast-nav a:hover { color: var(--copper); }
+
+      /* Quick-look "Next up" strip directly under masthead */
+      .nextup {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+        gap: 1px;
+        background: var(--rule);
+        border: 1px solid var(--rule);
+        margin: clamp(1.5rem, 3vw, 2.5rem) 0 0;
+      }
+      .nextup-tag {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.66rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--copper);
+        margin: clamp(1.5rem, 3vw, 2.5rem) 0 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .nextup-tag::before {
+        content: '';
+        width: 1rem;
+        height: 1px;
+        background: var(--copper);
+      }
+      .nextup a {
+        background: var(--bg);
+        padding: 1.2rem 1.2rem 1.1rem;
+        display: block;
+        text-decoration: none;
+        color: var(--bone);
+        transition: background 180ms ease;
+      }
+      .nextup a:hover { background: var(--bg-card); color: var(--bone); }
+      .nextup .day-row {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.72rem;
+        color: var(--copper);
+        letter-spacing: 0.06em;
+        margin-bottom: 0.3rem;
+      }
+      .nextup .day-row .yr { color: var(--muted); }
+      .nextup .nu-title {
+        font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+        font-variation-settings: 'opsz' 22, 'wdth' 100, 'wght' 500;
+        font-size: 1.05rem;
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+        margin: 0 0 0.25rem;
+      }
+      .nextup .nu-loc {
+        font-size: 0.83rem;
+        color: var(--bone-soft);
+      }
+
+      /* === SECTIONS === */
+      section {
+        position: relative;
+        padding: clamp(3rem, 6vw, 5rem) 0;
+        border-bottom: 1px solid var(--rule);
+      }
+      section.warm {
+        background: var(--bg-warm);
+        margin: 0 calc(-1 * clamp(1.5rem, 4vw, 3rem));
+        padding-left: clamp(1.5rem, 4vw, 3rem);
+        padding-right: clamp(1.5rem, 4vw, 3rem);
+      }
+      section.cool {
+        background: var(--bg-cool);
+        margin: 0 calc(-1 * clamp(1.5rem, 4vw, 3rem));
+        padding-left: clamp(1.5rem, 4vw, 3rem);
+        padding-right: clamp(1.5rem, 4vw, 3rem);
+      }
+      .sect-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.7rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--copper);
+        margin-bottom: clamp(0.8rem, 1.5vw, 1.25rem);
+      }
+      .sect-tag::before {
+        content: '';
+        display: inline-block;
+        width: 1.8rem;
+        height: 1px;
+        background: var(--copper);
+      }
+      h2 {
+        font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+        font-variation-settings: 'opsz' 60, 'wdth' 100, 'wght' 500;
+        font-size: clamp(1.85rem, 3.8vw, 2.9rem);
+        line-height: 1;
+        letter-spacing: -0.025em;
+        margin: 0 0 1rem;
+        max-width: 24ch;
+      }
+      h2 em {
+        font-style: italic;
+        font-variation-settings: 'opsz' 60, 'wdth' 95, 'wght' 400;
+        color: var(--copper);
+      }
+      .muted { color: var(--bone-soft); }
+      p { margin: 0 0 1rem; max-width: 60ch; }
+
+      /* === FULL EVENTS REGISTER === */
+      .register {
+        list-style: none;
+        margin: 1.25rem 0 0;
+        padding: 0;
+        border-top: 1px solid var(--rule);
+      }
+      .register li {
+        display: grid;
+        grid-template-columns: minmax(0, 4.5rem) minmax(0, 1fr) minmax(0, auto);
+        gap: clamp(1rem, 2vw, 2rem);
+        padding: 1.25rem 0;
+        border-bottom: 1px solid var(--rule);
+        align-items: center;
+        transition: background 160ms;
+      }
+      .register li:hover { background: rgba(208, 118, 54, 0.04); }
+      .reg-date {
+        font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+        font-variation-settings: 'opsz' 60, 'wdth' 95, 'wght' 600;
+        font-size: clamp(2.2rem, 4vw, 3rem);
+        line-height: 0.85;
+        letter-spacing: -0.025em;
+        color: var(--bone);
+      }
+      .reg-date .mo {
+        display: block;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-variation-settings: normal;
+        font-size: 0.72rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--copper);
+        margin-top: 0.35rem;
+        font-weight: 500;
+      }
+      .reg-mid h3 {
+        font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+        font-variation-settings: 'opsz' 24, 'wdth' 100, 'wght' 500;
+        font-size: clamp(1.05rem, 1.5vw, 1.2rem);
+        letter-spacing: -0.005em;
+        line-height: 1.2;
+        margin: 0 0 0.2rem;
+      }
+      .reg-mid .loc {
+        font-size: 0.86rem;
+        color: var(--bone-soft);
+      }
+      .reg-kind {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.66rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--bone-soft);
+        white-space: nowrap;
+      }
+      @media (max-width: 720px) {
+        .register li { grid-template-columns: minmax(0, 4.5rem) 1fr; row-gap: 0.5rem; }
+        .reg-kind { grid-column: 1 / -1; }
+      }
+
+      /* === MEMBERSHIP block === */
+      .join-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: clamp(2rem, 4vw, 3.5rem);
+        margin-top: 0.75rem;
+      }
+      @media (max-width: 720px) { .join-grid { grid-template-columns: 1fr; } }
+      .join-pills {
+        list-style: none;
+        margin: 1.25rem 0 1.75rem;
+        padding: 0;
+        display: grid;
+        gap: 0.6rem;
+      }
+      .join-pills li {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+        gap: 0.85rem;
+        align-items: baseline;
+      }
+      .join-pills .ix {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.72rem;
+        color: var(--copper);
+        letter-spacing: 0.06em;
+        font-weight: 500;
+      }
+      .join-pills .it { font-size: 0.98rem; line-height: 1.4; }
+
+      .join-card {
+        padding: clamp(1.5rem, 3vw, 2.25rem);
+        border: 1px solid var(--rule-warm);
+        background: linear-gradient(180deg, rgba(208, 118, 54, 0.08), transparent 75%);
+        position: relative;
+      }
+      .join-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--copper);
+      }
+      .join-stat {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+        gap: 0.6rem 1rem;
+        margin: 0;
+        padding: 0;
+        font-size: 0.9rem;
+      }
+      .join-stat dt {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.68rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--bone-soft);
+        align-self: center;
+        white-space: nowrap;
+      }
+      .join-stat dd { margin: 0; }
+      .join-stat dd strong {
+        font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+        font-variation-settings: 'opsz' 24, 'wdth' 100, 'wght' 500;
+        font-size: 1.05rem;
+        color: var(--copper);
+      }
+
+      /* === CONFERENCE === */
+      .conf-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+        gap: clamp(2rem, 4vw, 3.5rem);
+        align-items: start;
+      }
+      @media (max-width: 720px) { .conf-grid { grid-template-columns: 1fr; } }
+      .conf-card {
+        padding: clamp(1.5rem, 3vw, 2.25rem);
+        border: 1px solid var(--rule-warm);
+        background: var(--bg-card);
+      }
+      .conf-card dl {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+        gap: 0.7rem 1.5rem;
+        margin: 0;
+        font-size: 0.92rem;
+      }
+      .conf-card dt {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.68rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--bone-soft);
+        align-self: center;
+        white-space: nowrap;
+      }
+      .conf-card dd { margin: 0; }
+      .conf-card dd strong {
+        font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+        font-variation-settings: 'opsz' 24, 'wdth' 100, 'wght' 500;
+        font-size: 1.05rem;
+        color: var(--copper);
+      }
+
+      /* === COMMITTEE === */
       .committee-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
         gap: 1px;
         background: var(--rule);
         border: 1px solid var(--rule);
-        margin-top: 2rem;
+        margin-top: 1.5rem;
       }
       .committee-grid li {
         list-style: none;
         background: var(--bg);
-        padding: 1.25rem;
+        padding: 1.1rem 1.2rem;
       }
       .committee-grid .role {
         display: block;
         font-family: 'Bricolage Grotesque', system-ui, sans-serif;
         font-variation-settings: 'opsz' 24, 'wdth' 100, 'wght' 500;
-        font-size: 1.05rem;
+        font-size: 1rem;
         letter-spacing: -0.005em;
-        margin-bottom: 0.2rem;
+        margin-bottom: 0.15rem;
       }
       .committee-grid .desc {
-        font-size: 0.85rem;
+        font-size: 0.83rem;
         color: var(--bone-soft);
       }
 
-      /* Footer */
+      /* === FOOTER === */
       footer.colophon {
-        margin-top: clamp(4rem, 8vw, 7rem);
+        margin-top: clamp(3rem, 6vw, 5rem);
         padding-top: 2rem;
         border-top: 1px solid var(--copper-soft);
         display: grid;
-        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-        gap: 2rem;
+        grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+        gap: clamp(1.5rem, 3vw, 2.5rem);
+        align-items: start;
       }
       @media (max-width: 720px) { footer.colophon { grid-template-columns: 1fr; } }
-      footer .wordmark {
-        font-family: 'Bricolage Grotesque', system-ui, sans-serif;
-        font-variation-settings: 'opsz' 96, 'wdth' 75, 'wght' 700;
-        font-size: clamp(3rem, 8vw, 6rem);
-        line-height: 0.9;
-        letter-spacing: -0.04em;
-        color: var(--bone);
-        margin: 0 0 0.5rem;
+      .foot-logo {
+        width: clamp(54px, 6vw, 78px);
+        aspect-ratio: 1;
+        background: var(--bone);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0.85;
       }
-      footer .wordmark .acc { color: var(--copper); }
-      footer p {
+      .foot-logo img { width: 78%; height: 78%; object-fit: contain; }
+      footer .colophon-text {
         font-family: 'JetBrains Mono', ui-monospace, monospace;
         font-size: 0.7rem;
         line-height: 1.7;
         letter-spacing: 0.06em;
-        text-transform: uppercase;
         color: var(--bone-soft);
+        text-transform: uppercase;
         margin: 0;
+        max-width: 80ch;
       }
+      footer .colophon-text strong { color: var(--bone); font-weight: 500; }
 
-      /* Reveals */
+      /* === Reveals === */
       .reveal {
         opacity: 0;
         transform: translateX(-12px);
@@ -536,126 +823,207 @@ const strata = [
       .reveal:nth-child(3) { animation-delay: 220ms; }
       .reveal:nth-child(4) { animation-delay: 300ms; }
       .reveal:nth-child(5) { animation-delay: 380ms; }
-      .reveal:nth-child(6) { animation-delay: 460ms; }
-
-      @keyframes slide {
-        to { opacity: 1; transform: translateX(0); }
-      }
+      @keyframes slide { to { opacity: 1; transform: translateX(0); } }
     </style>
   </head>
   <body>
     <div class="util">
-      <span><span class="dot" aria-hidden="true"></span>ESPG · Direction B · Stratigraphic Modern</span>
+      <span><span class="dot" aria-hidden="true"></span>ESPG · Direction B (v2) · Stratigraphic Modern</span>
       <a href={url('/previews')}>← all directions</a>
     </div>
 
-    <aside class="core" aria-hidden="true">
-      <div class="strata"></div>
-    </aside>
-    <aside class="core-labels" aria-hidden="true">
-      {strata.map((s) => <span>{s.label} m</span>)}
+    <!-- GEOLOGICAL TIME SCALE — fixed left column -->
+    <aside class="gts" aria-label="Geological time scale">
+      <div class="gts-col">
+        {
+          bands.map((b) => (
+            <div
+              class="gts-band"
+              style={`top: ${b.topPct}%; height: ${b.heightPct}%; background: ${b.color};`}
+              title={`${b.name} — ${b.fromMa} to ${b.toMa} Ma`}
+            />
+          ))
+        }
+        <div class="gts-now" aria-hidden="true"></div>
+      </div>
+
+      <div class="gts-labels">
+        <div class="gts-now-label">
+          ● Now<span class="yr">2026 CE</span>
+        </div>
+        {
+          bands.map((b) => {
+            // Place label at vertical centre of the band
+            const centrePct = b.topPct + b.heightPct / 2;
+            // For very thin Phanerozoic bands at top, push label down so they don't pile up under "Now"
+            const safeTop = b.name === 'Cenozoic' ? 6.5 :
+                            b.name === 'Mesozoic' ? 10.5 :
+                            b.name === 'Paleozoic' ? 15.5 :
+                            centrePct;
+            return (
+              <div class="gts-label" style={`top: ${safeTop}%;`}>
+                <span class="nm">{b.name}</span>
+                <span class="age">{b.fromMa.toFixed(1).replace(/\.0$/, '')} Ma</span>
+              </div>
+            );
+          })
+        }
+        <div class="gts-footer">ICS chart · proportional · 4,567 Ma</div>
+      </div>
     </aside>
 
     <main class="page">
-      <section class="hero">
-        <p class="stratum-tag reveal">Stratum 01 — Surface</p>
-        <h1 class="reveal">
-          <span class="stack">Earth Sciences</span>
-          <span class="stack compressed">Postgraduate</span>
-          <span class="stack"><span class="ital">Group.</span></span>
-        </h1>
-        <p class="lede reveal">
-          A student-run community at the University of Melbourne for postgraduates working across
-          geology, geophysics, atmospheric and environmental sciences. <strong>Built by
-          postgrads, for postgrads</strong> — a low-stakes venue for work in progress.
-        </p>
-        <div class="hero-meta reveal">
-          <div class="cell">
-            <strong>120<em>+</em></strong>
-            members across SGEAS
+      <!-- MASTHEAD -->
+      <header class="mast">
+        <div class="mast-top">
+          <div class="specimen reveal">
+            <div class="specimen-disc">
+              <img src={url('/espg-logo.svg')} alt="ESPG logo" />
+            </div>
+            <span class="specimen-label">Specimen · est. 2007</span>
           </div>
-          <div class="cell">
-            <strong>03</strong>
-            day annual conference
+          <div class="mast-text reveal">
+            <p class="mast-eyebrow">Earth Sciences Postgraduate Group · UoM</p>
+            <h1 class="wordmark">ESPG<span class="ital">.</span></h1>
+            <p class="mast-sub">A postgraduate community in deep time.</p>
           </div>
-          <div class="cell">
-            <strong>16</strong>
-            events per year
-          </div>
-          <div class="cell">
-            <strong>2007</strong>
-            year founded
+          <div class="mast-cta reveal">
+            <a href="#join" class="cta">Join the society <span class="arrow">→</span></a>
+            <span class="cta-aside">Free · 1-minute sign-up</span>
           </div>
         </div>
-      </section>
 
-      <section class="warm">
-        <p class="stratum-tag">Stratum 02 — Upcoming</p>
-        <h2>Twelve months out, <em>five strata.</em></h2>
-        <p class="muted">
-          Events surface roughly every six weeks. Depths shown are arbitrary — a navigational
-          conceit borrowed from the core sample beside you.
+        <p class="mast-lede reveal">
+          Built by postgrads, for postgrads — across geology, geophysics, atmospheric and
+          environmental sciences. <strong>A low-stakes venue</strong> for work-in-progress,
+          fieldwork, and the people you'll be at conferences with for the next decade.
         </p>
-        <ol class="strata-list">
+
+        <nav class="mast-nav reveal">
+          <a href="#events">Events</a>
+          <a href="#join">Membership</a>
+          <a href="#conference">Conference</a>
+          <a href="#committee">Committee</a>
+          <a href="#colophon">About</a>
+        </nav>
+
+        <p class="nextup-tag">Next up — three closest dates</p>
+        <div class="nextup">
+          {
+            featured.map((e) => (
+              <a href="#events">
+                <div class="day-row">
+                  <span>{e.dd} {e.mo}</span>
+                  <span class="yr">'26 · {e.wd}</span>
+                </div>
+                <h3 class="nu-title">{e.title}</h3>
+                <div class="nu-loc">{e.loc}</div>
+              </a>
+            ))
+          }
+        </div>
+      </header>
+
+      <!-- EVENTS — full register -->
+      <section id="events">
+        <p class="sect-tag">Register</p>
+        <h2>Upcoming events, <em>tabulated.</em></h2>
+        <p class="muted">Six dates across the next six months. Hover for highlight.</p>
+        <ol class="register">
           {
             events.map((e) => (
               <li>
-                <span class="s-depth">{e.depth}</span>
-                <span class="s-date">
-                  {e.day}<br />
-                  {e.date} <span class="yr">'{e.year}</span>
+                <span class="reg-date">
+                  {e.dd}<span class="mo">{e.mo} '26</span>
                 </span>
-                <span class="s-title">
-                  {e.title}
-                  <span class="loc">{e.loc}</span>
-                </span>
-                <span class="s-kind">{e.kind}</span>
+                <div class="reg-mid">
+                  <h3>{e.title}</h3>
+                  <span class="loc">{e.wd} · {e.loc}</span>
+                </div>
+                <span class="reg-kind">{e.kind}</span>
               </li>
             ))
           }
         </ol>
-        <a href="#" class="cta cta--ghost" style="margin-top: 2rem;">
-          Full register <span class="arrow">→</span>
-        </a>
+        <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+          <a href="#" class="cta cta--ghost">Full register <span class="arrow">→</span></a>
+          <span class="cta-aside">Subscribe to event emails when you join.</span>
+        </div>
       </section>
 
-      <section>
-        <p class="stratum-tag">Stratum 03 — Conference</p>
+      <!-- MEMBERSHIP -->
+      <section class="warm" id="join">
+        <p class="sect-tag">Membership</p>
+        <h2>Free. <em>For any postgrad</em> in the school.</h2>
+        <div class="join-grid">
+          <div>
+            <p>
+              Membership takes about a minute to sign up. There are no fees, no formal
+              commitments, and you can stay on the mailing list for as long as you're a
+              postgraduate in SGEAS.
+            </p>
+            <ul class="join-pills">
+              <li><span class="ix">01</span><span class="it">Event emails — BBQs, field trips, pub nights, conferences.</span></li>
+              <li><span class="ix">02</span><span class="it">Conference call for abstracts each August.</span></li>
+              <li><span class="ix">03</span><span class="it">School-level representation through the HDR rep.</span></li>
+              <li><span class="ix">04</span><span class="it">Travel and conference bursaries (where budget allows).</span></li>
+              <li><span class="ix">05</span><span class="it">Occasional opportunities from outside the school.</span></li>
+            </ul>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+              <a href="#" class="cta">Join the society <span class="arrow">→</span></a>
+              <a href="#" class="cta cta--ghost">Mailing list only</a>
+            </div>
+          </div>
+          <aside class="join-card">
+            <dl class="join-stat">
+              <dt>Members</dt>
+              <dd><strong>120+</strong> across SGEAS</dd>
+              <dt>Cost</dt>
+              <dd><strong>Free</strong> for SGEAS HDRs</dd>
+              <dt>Events / yr</dt>
+              <dd><strong>16</strong> on average</dd>
+              <dt>Conference</dt>
+              <dd><strong>Annual</strong>, in October</dd>
+              <dt>Founded</dt>
+              <dd><strong>2007</strong></dd>
+              <dt>Affiliated</dt>
+              <dd>UMSU GSA</dd>
+            </dl>
+          </aside>
+        </div>
+      </section>
+
+      <!-- CONFERENCE -->
+      <section id="conference">
+        <p class="sect-tag">Conference</p>
         <div class="conf-grid">
           <div>
             <h2>An annual <em>postgraduate</em> conference, in October.</h2>
             <p>
               Three days of HDR-led talks alongside invited keynotes from across the earth
               sciences. The conference is a supportive venue for students to present
-              work-in-progress, gather feedback from peers, and meet researchers from outside
+              work-in-progress, get feedback from peers, and meet researchers from outside
               their immediate group.
             </p>
             <p class="muted">Registration opens August. Call for abstracts the same week.</p>
-            <a href="#" class="cta" style="margin-top: 1rem;">
-              Conference details <span class="arrow">→</span>
-            </a>
+            <a href="#" class="cta" style="margin-top: 0.5rem;">Conference details <span class="arrow">→</span></a>
           </div>
           <aside class="conf-card">
             <dl>
-              <dt>Dates</dt>
-              <dd><strong>18–20 Oct 2026</strong></dd>
-              <dt>Location</dt>
-              <dd>University of Melbourne, Parkville</dd>
-              <dt>Theme</dt>
-              <dd>Earth in transition</dd>
-              <dt>Keynote</dt>
-              <dd>To be announced</dd>
-              <dt>Format</dt>
-              <dd>Talks · posters · lightning</dd>
-              <dt>Abstracts</dt>
-              <dd>Open Aug · close Sep</dd>
+              <dt>Dates</dt><dd><strong>18–20 Oct 2026</strong></dd>
+              <dt>Location</dt><dd>University of Melbourne, Parkville</dd>
+              <dt>Theme</dt><dd>Earth in transition</dd>
+              <dt>Keynote</dt><dd>To be announced</dd>
+              <dt>Format</dt><dd>Talks · posters · lightning</dd>
+              <dt>Abstracts</dt><dd>Open Aug · close Sep</dd>
             </dl>
           </aside>
         </div>
       </section>
 
-      <section class="cool">
-        <p class="stratum-tag">Stratum 04 — Committee</p>
+      <!-- COMMITTEE -->
+      <section class="cool" id="committee">
+        <p class="sect-tag">Committee</p>
         <h2>Six elected roles. <em>One year.</em></h2>
         <p class="muted">Voted at the AGM each March. All current postgraduates in SGEAS.</p>
         <ul class="committee-grid">
@@ -668,26 +1036,13 @@ const strata = [
         </ul>
       </section>
 
-      <section>
-        <p class="stratum-tag">Stratum 05 — Join</p>
-        <h2>Membership is <em>free</em>.</h2>
-        <p>
-          For any postgraduate enrolled in SGEAS. Sign-up takes about a minute. You'll get event
-          announcements, the conference call for abstracts, and occasional opportunities from
-          outside the school.
-        </p>
-        <a href="#" class="cta">
-          Join the society <span class="arrow">→</span>
-        </a>
-      </section>
-
-      <footer class="colophon">
-        <p class="wordmark">ESP<span class="acc">G</span>.</p>
-        <p>
-          Set in Bricolage Grotesque (variable, full width and weight axes used) with Hanken
-          Grotesk for body and JetBrains Mono for tabular data. Earth Sciences Postgraduate
-          Group · School of Geography, Earth and Atmospheric Sciences · The University of
-          Melbourne · 2026.
+      <footer class="colophon" id="colophon">
+        <div class="foot-logo"><img src={url('/espg-logo.svg')} alt="" /></div>
+        <p class="colophon-text">
+          <strong>ESPG</strong> · Earth Sciences Postgraduate Group · School of Geography, Earth
+          and Atmospheric Sciences · The University of Melbourne · est. 2007 · Set in Bricolage
+          Grotesque (variable opsz · wdth · wght), Hanken Grotesk, JetBrains Mono. Time scale
+          after the International Chronostratigraphic Chart (ICS 2023).
         </p>
       </footer>
     </main>
