@@ -1,7 +1,8 @@
 ---
 /**
  * International Chronostratigraphic Chart (ICS 2023) — proportional column.
- * Total = 4567 Ma (Hadean start). Cenozoic at top is intentionally a thin sliver.
+ * Spans the full height of the page; scrolls with content so the reader moves
+ * "down" through deep time as they scroll the page.
  */
 const timeScale = [
   { name: 'Cenozoic',    fromMa:   66.0, toMa:    0.0, color: '#F2F91D' },
@@ -26,6 +27,7 @@ const bands = timeScale.map((t) => ({
       bands.map((b) => (
         <div
           class="gts-band"
+          data-era={b.name}
           style={`top: ${b.topPct}%; height: ${b.heightPct}%; background: ${b.color};`}
           title={`${b.name} — ${b.fromMa} to ${b.toMa} Ma`}
         />
@@ -40,35 +42,45 @@ const bands = timeScale.map((t) => ({
     </div>
     {
       bands.map((b) => {
+        // Cluster the thin Phanerozoic labels at the top with proper spacing.
+        // For the others, use the natural band centre.
         const centrePct = b.topPct + b.heightPct / 2;
-        // Push the thin Phanerozoic labels down so they don't collide with "Now"
         const safeTop =
-          b.name === 'Cenozoic' ? 6.5
-          : b.name === 'Mesozoic' ? 10.5
-          : b.name === 'Paleozoic' ? 15.5
+          b.name === 'Cenozoic'  ? 3.5
+          : b.name === 'Mesozoic'   ? 5.5
+          : b.name === 'Paleozoic'  ? 8.5
           : centrePct;
         return (
-          <div class="gts-label" style={`top: ${safeTop}%;`}>
+          <div class="gts-label" data-era={b.name} style={`top: ${safeTop}%;`}>
             <span class="nm">{b.name}</span>
             <span class="age">{b.fromMa.toFixed(1).replace(/\.0$/, '')} Ma</span>
           </div>
         );
       })
     }
-    <div class="gts-footer">ICS chart · proportional · 4,567 Ma</div>
   </div>
 </aside>
 
+<!-- Fixed "you are here" indicator that stays at viewport mid-line; the chart scrolls past it. -->
+<div class="gts-pointer" aria-hidden="true">
+  <div class="gts-pointer-line"></div>
+  <div class="gts-pointer-label">
+    <span class="gts-pointer-prefix">Viewing</span>
+    <span class="gts-pointer-era" data-current-era>Cenozoic</span>
+  </div>
+</div>
+
 <style>
+  /* === Column container — absolute, spans full document height === */
   .gts {
-    position: fixed;
+    position: absolute;
     left: 0;
     top: 0;
     bottom: 0;
     width: var(--time-col);
-    z-index: 40;
+    z-index: 10;
     pointer-events: none;
-    padding: 1rem 0.75rem 1.25rem 1rem;
+    padding: 1rem 0.75rem 1.5rem 1rem;
     display: flex;
     gap: 0.6rem;
     border-right: 1px solid var(--rule);
@@ -98,6 +110,7 @@ const bands = timeScale.map((t) => ({
   }
   .gts-band:first-child::after { display: none; }
 
+  /* "Now" dot at the very top of the column */
   .gts-now {
     position: absolute;
     left: -10px;
@@ -115,6 +128,7 @@ const bands = timeScale.map((t) => ({
     50%      { box-shadow: 0 0 22px rgba(208, 118, 54, 0.95); }
   }
 
+  /* === Labels column === */
   .gts-labels {
     position: relative;
     flex: 1;
@@ -130,6 +144,7 @@ const bands = timeScale.map((t) => ({
     right: 0;
     padding-left: 0.4rem;
     transform: translateY(-50%);
+    transition: opacity 200ms ease, color 200ms ease;
   }
   .gts-label .nm {
     display: block;
@@ -138,6 +153,7 @@ const bands = timeScale.map((t) => ({
     letter-spacing: 0.1em;
     font-size: 0.62rem;
     font-weight: 500;
+    transition: color 220ms ease;
   }
   .gts-label .age {
     display: block;
@@ -153,6 +169,13 @@ const bands = timeScale.map((t) => ({
     width: 0.4rem;
     height: 1px;
     background: var(--rule);
+  }
+  .gts-label[data-active='true'] .nm {
+    color: var(--copper);
+  }
+  .gts-label[data-active='true']::before {
+    background: var(--copper);
+    width: 0.6rem;
   }
   .gts-now-label {
     position: absolute;
@@ -174,20 +197,104 @@ const bands = timeScale.map((t) => ({
     letter-spacing: 0.04em;
     margin-top: 1px;
   }
-  .gts-footer {
+
+  /* === Fixed viewport pointer === */
+  .gts-pointer {
+    position: fixed;
+    left: 0;
+    top: 38vh;
+    width: var(--time-col);
+    z-index: 11;
+    pointer-events: none;
+  }
+  .gts-pointer-line {
     position: absolute;
     left: 1rem;
     right: 0.75rem;
-    bottom: 0.5rem;
+    top: 0;
+    height: 0;
+    border-top: 1px dashed rgba(208, 118, 54, 0.55);
+  }
+  .gts-pointer-line::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: -4px;
+    border-style: solid;
+    border-width: 4px 0 4px 7px;
+    border-color: transparent transparent transparent var(--copper);
+  }
+  .gts-pointer-label {
+    position: absolute;
+    left: 1.7rem;
+    top: 6px;
     font-family: var(--font-mono);
     font-size: 0.55rem;
-    line-height: 1.3;
-    letter-spacing: 0.08em;
-    color: var(--muted);
+    letter-spacing: 0.16em;
     text-transform: uppercase;
+    line-height: 1.2;
+    color: var(--copper);
+    white-space: nowrap;
+  }
+  .gts-pointer-prefix {
+    display: block;
+    color: var(--muted);
+    font-size: 0.5rem;
+    margin-bottom: 1px;
   }
 
   @media (max-width: 860px) {
-    .gts { display: none; }
+    .gts, .gts-pointer { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gts-now { animation: none; }
   }
 </style>
+
+<script>
+  // Update the "Viewing X" label and highlight the active era as the user scrolls.
+  // Pure native JS, no deps.
+  const eras = [
+    { name: 'Cenozoic',    topPct:  0.00, bottomPct:  1.45 },
+    { name: 'Mesozoic',    topPct:  1.45, bottomPct:  5.52 },
+    { name: 'Paleozoic',   topPct:  5.52, bottomPct: 11.80 },
+    { name: 'Proterozoic', topPct: 11.80, bottomPct: 54.74 },
+    { name: 'Archean',     topPct: 54.74, bottomPct: 87.59 },
+    { name: 'Hadean',      topPct: 87.59, bottomPct: 100.00 },
+  ];
+
+  const pointerEl = document.querySelector('[data-current-era]') as HTMLElement | null;
+  const colEl = document.querySelector('.gts-col') as HTMLElement | null;
+  const labels = Array.from(document.querySelectorAll('.gts-label')) as HTMLElement[];
+
+  if (pointerEl && colEl) {
+    let raf = 0;
+    const POINTER_Y_RATIO = 0.38; // matches CSS top: 38vh
+
+    const update = () => {
+      raf = 0;
+      const rect = colEl.getBoundingClientRect();
+      if (rect.height <= 0) return;
+      const pointerY = window.innerHeight * POINTER_Y_RATIO;
+      const yInChart = pointerY - rect.top;
+      const pct = Math.max(0, Math.min(100, (yInChart / rect.height) * 100));
+      const era = eras.find((e) => pct >= e.topPct && pct < e.bottomPct) ?? eras[eras.length - 1];
+      if (pointerEl.textContent !== era.name) {
+        pointerEl.textContent = era.name;
+      }
+      labels.forEach((el) => {
+        el.dataset.active = el.dataset.era === era.name ? 'true' : 'false';
+      });
+    };
+
+    const schedule = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(update);
+    };
+
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+    update();
+  }
+</script>

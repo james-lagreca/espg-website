@@ -8,7 +8,6 @@ import { url } from '../lib/url';
 interface Props {
   title: string;
   description?: string;
-  /** When true, header + footer are still rendered but with no top border/margin between header and content (used for the home page hero). */
   bleed?: boolean;
 }
 const { title, description, bleed = false } = Astro.props;
@@ -37,17 +36,22 @@ const fullTitle = title === siteName ? title : `${title} · ESPG`;
   <body>
     <a href="#main" class="skip">Skip to content</a>
 
-    <GeoTimeScale />
-
-    <div class="page-shell" data-bleed={bleed ? 'true' : 'false'}>
-      <SocietyHeader />
-      <main id="main" class={bleed ? 'main main--bleed' : 'main'}>
-        <slot />
-      </main>
-      <SocietyFooter />
+    <div class="layout-frame">
+      <GeoTimeScale />
+      <div class="page-shell" data-bleed={bleed ? 'true' : 'false'}>
+        <SocietyHeader />
+        <main id="main" class={bleed ? 'main main--bleed' : 'main'}>
+          <slot />
+        </main>
+        <SocietyFooter />
+      </div>
     </div>
 
     <style>
+      .layout-frame {
+        position: relative;
+        min-height: 100vh;
+      }
       .page-shell {
         position: relative;
         z-index: 1;

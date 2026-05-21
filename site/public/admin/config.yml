@@ -1,0 +1,135 @@
+# Decap CMS configuration for ESPG
+# Edits made here commit straight to the `main` branch on GitHub.
+# Docs: https://decapcms.org/docs/
+
+backend:
+  name: github
+  repo: james-lagreca/espg-website
+  branch: main
+  # Cloudflare Worker OAuth proxy. Replace once you've deployed
+  # the worker from docs/cf-worker-oauth.js per docs/decap-cms-setup.md.
+  base_url: https://espg-oauth.PLACEHOLDER.workers.dev
+  auth_endpoint: auth
+
+# Allow local editing via `npx decap-server` running on localhost:8081.
+# Comment this out (or set to false) for production.
+local_backend: true
+
+# Skip the slow first-load OAuth re-check.
+publish_mode: simple
+
+# Media uploads
+# When the site lives at https://james-lagreca.github.io/espg-website/, files
+# under site/public/uploads/ are served at /espg-website/uploads/.
+# When the custom domain is connected (Phase 7), change public_folder to "/uploads".
+media_folder: "site/public/uploads"
+public_folder: "/espg-website/uploads"
+
+# Site URL — Decap uses this for preview links.
+site_url: https://james-lagreca.github.io/espg-website
+display_url: https://james-lagreca.github.io/espg-website
+
+# Logo shown at the top of the editor.
+logo_url: /espg-website/espg-logo.svg
+
+collections:
+  # ----- EVENTS -----------------------------------------------------------
+  - name: events
+    label: Events
+    label_singular: Event
+    description: Society events — BBQs, field trips, conferences, reading groups.
+    folder: "site/src/content/events"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    summary: "{{title}} — {{location}} ({{year(date)}}-{{month(date)}}-{{day(date)}})"
+    sortable_fields: [date, title]
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Start date & time, name: date, widget: datetime, picker_utc: false }
+      - { label: End date & time (optional), name: endDate, widget: datetime, picker_utc: false, required: false }
+      - { label: Location, name: location, widget: string, hint: "e.g. 'South Lawn, Parkville campus'" }
+      - { label: Short description, name: description, widget: text, hint: "1-2 sentences shown in the events listing." }
+      - { label: Image (optional), name: image, widget: image, required: false }
+      - { label: External link (optional), name: link, widget: string, required: false, hint: "Full URL, including https://" }
+      - { label: Draft, name: draft, widget: boolean, default: false, hint: "Tick to hide from the live site while you draft." }
+      - { label: Body, name: body, widget: markdown, hint: "Full event description. Supports markdown." }
+
+  # ----- COMMITTEE --------------------------------------------------------
+  - name: committee
+    label: Committee
+    label_singular: Committee member
+    description: Current ESPG committee.
+    folder: "site/src/content/committee"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    summary: "{{name}} — {{role}}"
+    sortable_fields: [order, name]
+    fields:
+      - { label: Name, name: name, widget: string }
+      - { label: Role, name: role, widget: string, hint: "e.g. 'Chair', 'Secretary'" }
+      - { label: Display order, name: order, widget: number, default: 99, value_type: int, hint: "Lower = higher up the committee page. 1 = first." }
+      - { label: Photo, name: photo, widget: image, required: false }
+      - { label: Email (optional), name: email, widget: string, required: false }
+      - { label: Bio, name: body, widget: markdown, hint: "A short bio. Supports markdown." }
+
+  # ----- ABSTRACTS --------------------------------------------------------
+  - name: abstracts
+    label: Conference abstracts
+    label_singular: Abstract
+    description: Accepted abstracts for the annual postgraduate conference.
+    folder: "site/src/content/abstracts"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    summary: "{{title}} — {{presenter}}"
+    sortable_fields: [presenter, session, title]
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Presenter, name: presenter, widget: string }
+      - { label: Affiliation, name: affiliation, widget: string }
+      - { label: Co-authors, name: coauthors, widget: list, required: false, field: { label: Co-author, name: name, widget: string } }
+      - { label: Session, name: session, widget: string, required: false, hint: "e.g. 'Active tectonics and seismic hazard'" }
+      - { label: Slot, name: slot, widget: string, required: false, hint: "e.g. 'Day 1, 11:00'" }
+      - { label: PDF URL (optional), name: pdfUrl, widget: string, required: false }
+      - { label: Abstract text, name: body, widget: markdown }
+
+  # ----- PRESENTERS -------------------------------------------------------
+  - name: presenters
+    label: Conference presenters
+    label_singular: Presenter
+    description: Keynote and invited speakers for the conference.
+    folder: "site/src/content/presenters"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    summary: "{{name}} — {{role}}"
+    sortable_fields: [order, name, role]
+    fields:
+      - { label: Name, name: name, widget: string }
+      - { label: Affiliation, name: affiliation, widget: string }
+      - label: Role
+        name: role
+        widget: select
+        default: speaker
+        options:
+          - { label: Keynote speaker, value: keynote }
+          - { label: Invited speaker, value: invited }
+          - { label: Speaker,         value: speaker }
+      - { label: Photo, name: photo, widget: image, required: false }
+      - { label: Display order, name: order, widget: number, default: 99, value_type: int }
+      - { label: Bio, name: body, widget: markdown }
+
+# NOTE — the conference programme (src/content/agenda.yml) is currently edited
+# directly in the repo. It's a small file with relatively rare edits (once per
+# year, by the conference chair). If/when we need a Decap collection for it
+# we'll restructure to one-file-per-item.
