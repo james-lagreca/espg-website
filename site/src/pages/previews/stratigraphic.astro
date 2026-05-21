@@ -1,0 +1,695 @@
+---
+import { url } from '../../lib/url';
+
+const events = [
+  { depth: '00.15', date: '15 Jul', year: '26', day: 'Wed', title: 'Welcome BBQ', loc: 'South Lawn · Parkville', kind: 'Social' },
+  { depth: '02.40', date: '12 Sep', year: '26', day: 'Sat', title: 'Field trip — Otway Ranges', loc: 'Victoria · 2 days', kind: 'Field' },
+  { depth: '03.85', date: '18 Oct', year: '26', day: 'Sun', title: 'Annual Postgraduate Conference', loc: 'Parkville · 3 days', kind: 'Conference' },
+  { depth: '05.10', date: '14 Nov', year: '26', day: 'Sat', title: 'Reading group — neotectonics', loc: 'McCoy Building', kind: 'Academic' },
+  { depth: '06.75', date: '06 Dec', year: '26', day: 'Sun', title: 'End-of-year dinner', loc: 'Lygon St · TBC', kind: 'Social' },
+];
+
+// Strata bands shown in the core column
+const strata = [
+  { depth: 0, color: '#c46a2e', label: '00.00' },
+  { depth: 16, color: '#7a4818', label: '01.50' },
+  { depth: 32, color: '#3d4a2a', label: '03.00' },
+  { depth: 50, color: '#5a5246', label: '05.20' },
+  { depth: 68, color: '#2a322e', label: '06.80' },
+  { depth: 85, color: '#1a1c1a', label: '08.40' },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ESPG · Direction B — Stratigraphic Modern</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Hanken+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #18191a;
+        --bg-warm: #1d1e1c;
+        --bg-cool: #161819;
+        --bone: #e6e1d6;
+        --bone-soft: #a6a097;
+        --muted: #6a655c;
+        --copper: #d07636;
+        --copper-soft: #9a5526;
+        --moss: #4a5c33;
+        --rule: #2e2f30;
+        --rule-warm: #3a3530;
+      }
+      *,
+      *::before,
+      *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--bone);
+        font-family: 'Hanken Grotesk', system-ui, sans-serif;
+        font-size: 16px;
+        line-height: 1.55;
+        font-weight: 400;
+        overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* Atmospheric contour lines — subtle topo bg */
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.55;
+        z-index: 0;
+        background-image:
+          radial-gradient(ellipse 80% 60% at 20% 40%, transparent 30%, rgba(208, 118, 54, 0.04) 30.3%, transparent 30.6%),
+          radial-gradient(ellipse 80% 60% at 20% 40%, transparent 40%, rgba(208, 118, 54, 0.035) 40.3%, transparent 40.6%),
+          radial-gradient(ellipse 80% 60% at 20% 40%, transparent 50%, rgba(208, 118, 54, 0.03) 50.3%, transparent 50.6%),
+          radial-gradient(ellipse 80% 60% at 20% 40%, transparent 60%, rgba(208, 118, 54, 0.025) 60.3%, transparent 60.6%),
+          radial-gradient(ellipse 80% 60% at 80% 70%, transparent 25%, rgba(74, 92, 51, 0.04) 25.3%, transparent 25.6%),
+          radial-gradient(ellipse 80% 60% at 80% 70%, transparent 35%, rgba(74, 92, 51, 0.035) 35.3%, transparent 35.6%),
+          radial-gradient(ellipse 80% 60% at 80% 70%, transparent 45%, rgba(74, 92, 51, 0.03) 45.3%, transparent 45.6%);
+      }
+
+      a {
+        color: var(--bone);
+        text-decoration: none;
+        transition: color 180ms ease;
+      }
+      a:hover { color: var(--copper); }
+
+      /* Top utility bar */
+      .util {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 60;
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem clamp(1.25rem, 4vw, 3rem) 1rem clamp(4rem, 6vw, 5rem);
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.7rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--bone-soft);
+        background: linear-gradient(to bottom, var(--bg) 60%, transparent);
+        pointer-events: none;
+      }
+      .util a { color: var(--bone-soft); pointer-events: auto; }
+      .util a:hover { color: var(--copper); }
+      .util .dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--copper);
+        margin-right: 0.5rem;
+        vertical-align: 1px;
+        box-shadow: 0 0 12px var(--copper);
+      }
+
+      /* The CORE — vertical stratigraphic column down the left edge */
+      .core {
+        position: fixed;
+        left: clamp(1rem, 2.5vw, 2rem);
+        top: 0;
+        bottom: 0;
+        width: 14px;
+        z-index: 40;
+        pointer-events: none;
+      }
+      .core .strata {
+        position: absolute;
+        inset: 0;
+        border: 1px solid var(--rule-warm);
+        background: linear-gradient(
+          to bottom,
+          #c46a2e 0% 8%,
+          #7a4818 8% 14%,
+          #5a3a16 14% 22%,
+          #3d4a2a 22% 32%,
+          #5a5246 32% 42%,
+          #4a3f33 42% 52%,
+          #3d362e 52% 64%,
+          #2a322e 64% 75%,
+          #1f2522 75% 86%,
+          #14171a 86% 100%
+        );
+      }
+      .core::after {
+        /* Horizontal bedding lines */
+        content: '';
+        position: absolute;
+        inset: 1px;
+        background-image: repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 22px,
+          rgba(0, 0, 0, 0.5) 22px,
+          rgba(0, 0, 0, 0.5) 23px
+        );
+      }
+      .core-labels {
+        position: fixed;
+        left: clamp(2.5rem, 4.5vw, 4rem);
+        top: 0;
+        bottom: 0;
+        width: 4rem;
+        z-index: 41;
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 6rem 0 3rem;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.62rem;
+        letter-spacing: 0.1em;
+        color: var(--bone-soft);
+      }
+      .core-labels span {
+        position: relative;
+        padding-left: 0.5rem;
+      }
+      .core-labels span::before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        top: 50%;
+        width: 6px;
+        height: 1px;
+        background: var(--bone-soft);
+      }
+
+      @media (max-width: 720px) {
+        .core, .core-labels { display: none; }
+      }
+
+      /* Page frame */
+      .page {
+        position: relative;
+        z-index: 1;
+        max-width: 80rem;
+        margin: 0 auto;
+        padding: clamp(5rem, 10vh, 8rem) clamp(1.5rem, 4vw, 3rem) 4rem clamp(7rem, 11vw, 10rem);
+      }
+
+      @media (max-width: 720px) {
+        .page {
+          padding-left: clamp(1.25rem, 5vw, 2rem);
+        }
+      }
+
+      /* SECTION STRATA */
+      section {
+        position: relative;
+        padding: clamp(3rem, 7vw, 6rem) 0;
+        border-top: 1px solid var(--rule);
+      }
+      section:first-of-type { border-top: none; padding-top: 0; }
+      section.warm { background: var(--bg-warm); margin: 0 calc(-1 * clamp(1.5rem, 4vw, 3rem)); padding-left: clamp(1.5rem, 4vw, 3rem); padding-right: clamp(1.5rem, 4vw, 3rem); }
+      section.cool { background: var(--bg-cool); margin: 0 calc(-1 * clamp(1.5rem, 4vw, 3rem)); padding-left: clamp(1.5rem, 4vw, 3rem); padding-right: clamp(1.5rem, 4vw, 3rem); }
+
+      .stratum-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.7rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--copper);
+        margin-bottom: clamp(1rem, 2vw, 1.5rem);
+      }
+      .stratum-tag::before {
+        content: '';
+        display: inline-block;
+        width: 2rem;
+        height: 1px;
+        background: var(--copper);
+      }
+
+      /* HERO */
+      .hero h1 {
+        font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+        font-variation-settings: 'opsz' 96, 'wdth' 100, 'wght' 600;
+        font-size: clamp(3.5rem, 12vw, 9rem);
+        line-height: 0.88;
+        letter-spacing: -0.045em;
+        margin: 0 0 1.75rem;
+        max-width: 14ch;
+      }
+      .hero h1 .ital {
+        font-style: italic;
+        font-variation-settings: 'opsz' 96, 'wdth' 95, 'wght' 400;
+        color: var(--copper);
+      }
+      .hero h1 .stack { display: block; }
+      .hero h1 .compressed {
+        font-variation-settings: 'opsz' 96, 'wdth' 75, 'wght' 700;
+        letter-spacing: -0.03em;
+      }
+      .hero .lede {
+        font-size: clamp(1.1rem, 1.5vw, 1.3rem);
+        max-width: 48ch;
+        line-height: 1.45;
+        color: var(--bone);
+        margin: 0 0 2.5rem;
+        font-weight: 400;
+      }
+      .hero .lede strong {
+        color: var(--copper);
+        font-weight: 500;
+      }
+
+      .hero-meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+        gap: clamp(1.5rem, 3vw, 2.5rem);
+        padding: 1.5rem 0;
+        border-top: 1px solid var(--rule-warm);
+        border-bottom: 1px solid var(--rule-warm);
+      }
+      .hero-meta .cell {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.72rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--bone-soft);
+        line-height: 1.5;
+      }
+      .hero-meta .cell strong {
+        display: block;
+        font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+        font-variation-settings: 'opsz' 36, 'wdth' 100, 'wght' 500;
+        font-size: 1.6rem;
+        letter-spacing: -0.01em;
+        text-transform: none;
+        color: var(--bone);
+        margin-bottom: 0.25rem;
+      }
+      .hero-meta .cell strong em {
+        font-style: italic;
+        color: var(--copper);
+        font-variation-settings: 'opsz' 36, 'wdth' 95, 'wght' 400;
+      }
+
+      h2 {
+        font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+        font-variation-settings: 'opsz' 60, 'wdth' 100, 'wght' 500;
+        font-size: clamp(2rem, 4vw, 3.25rem);
+        line-height: 0.98;
+        letter-spacing: -0.025em;
+        margin: 0 0 1.25rem;
+        max-width: 22ch;
+      }
+      h2 em {
+        font-style: italic;
+        font-variation-settings: 'opsz' 60, 'wdth' 95, 'wght' 400;
+        color: var(--copper);
+      }
+
+      p { margin: 0 0 1.1rem; max-width: 58ch; }
+      .muted { color: var(--bone-soft); }
+
+      /* Events table */
+      .strata-list {
+        margin-top: 2rem;
+        border-top: 1px solid var(--rule);
+      }
+      .strata-list li {
+        list-style: none;
+        display: grid;
+        grid-template-columns: minmax(0, 6ch) minmax(0, 11ch) minmax(0, 1fr) minmax(0, 8ch);
+        gap: clamp(0.75rem, 2vw, 1.75rem);
+        padding: 1.4rem 0;
+        border-bottom: 1px solid var(--rule);
+        align-items: center;
+      }
+      .strata-list li:hover { background: rgba(208, 118, 54, 0.04); }
+      .s-depth {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.78rem;
+        color: var(--copper);
+        letter-spacing: 0.04em;
+      }
+      .s-date {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.85rem;
+        color: var(--bone-soft);
+        letter-spacing: 0.02em;
+        line-height: 1.3;
+      }
+      .s-date .yr { color: var(--muted); font-size: 0.78rem; }
+      .s-title {
+        font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+        font-variation-settings: 'opsz' 24, 'wdth' 100, 'wght' 500;
+        font-size: clamp(1.05rem, 1.4vw, 1.2rem);
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+      }
+      .s-title .loc {
+        display: block;
+        font-family: 'Hanken Grotesk', system-ui, sans-serif;
+        font-variation-settings: normal;
+        font-size: 0.85rem;
+        color: var(--bone-soft);
+        font-weight: 400;
+        margin-top: 0.2rem;
+      }
+      .s-kind {
+        text-align: right;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.7rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--bone-soft);
+      }
+
+      @media (max-width: 720px) {
+        .strata-list li {
+          grid-template-columns: minmax(0, 6ch) 1fr;
+          row-gap: 0.4rem;
+        }
+        .s-date { grid-column: 2; }
+        .s-title { grid-column: 1 / -1; }
+        .s-kind { grid-column: 1 / -1; text-align: left; }
+      }
+
+      /* Conference block */
+      .conf-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+        gap: clamp(2rem, 5vw, 4rem);
+        align-items: start;
+      }
+      @media (max-width: 720px) { .conf-grid { grid-template-columns: 1fr; } }
+      .conf-card {
+        padding: clamp(1.5rem, 3vw, 2.5rem);
+        border: 1px solid var(--rule-warm);
+        background: linear-gradient(180deg, rgba(208, 118, 54, 0.08), transparent 80%);
+        position: relative;
+      }
+      .conf-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--copper);
+      }
+      .conf-card dl {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+        gap: 0.75rem 1.5rem;
+        margin: 0;
+        font-size: 0.92rem;
+      }
+      .conf-card dt {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.7rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--bone-soft);
+        align-self: center;
+      }
+      .conf-card dd { margin: 0; color: var(--bone); }
+      .conf-card dd strong {
+        font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+        font-variation-settings: 'opsz' 24, 'wdth' 100, 'wght' 500;
+        font-size: 1.1rem;
+        letter-spacing: -0.005em;
+        color: var(--copper);
+      }
+
+      /* CTA */
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.95rem 1.4rem;
+        background: var(--copper);
+        color: var(--bg);
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.78rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        border: none;
+        margin-top: 0.5rem;
+        transition: background 200ms ease, transform 200ms ease;
+      }
+      .cta:hover {
+        background: var(--bone);
+        color: var(--bg);
+        transform: translateY(-1px);
+      }
+      .cta--ghost {
+        background: transparent;
+        color: var(--bone);
+        border: 1px solid var(--rule-warm);
+      }
+      .cta--ghost:hover {
+        background: transparent;
+        color: var(--copper);
+        border-color: var(--copper);
+      }
+      .arrow {
+        display: inline-block;
+        transition: transform 200ms ease;
+      }
+      .cta:hover .arrow { transform: translateX(4px); }
+
+      /* Committee */
+      .committee-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+        gap: 1px;
+        background: var(--rule);
+        border: 1px solid var(--rule);
+        margin-top: 2rem;
+      }
+      .committee-grid li {
+        list-style: none;
+        background: var(--bg);
+        padding: 1.25rem;
+      }
+      .committee-grid .role {
+        display: block;
+        font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+        font-variation-settings: 'opsz' 24, 'wdth' 100, 'wght' 500;
+        font-size: 1.05rem;
+        letter-spacing: -0.005em;
+        margin-bottom: 0.2rem;
+      }
+      .committee-grid .desc {
+        font-size: 0.85rem;
+        color: var(--bone-soft);
+      }
+
+      /* Footer */
+      footer.colophon {
+        margin-top: clamp(4rem, 8vw, 7rem);
+        padding-top: 2rem;
+        border-top: 1px solid var(--copper-soft);
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+        gap: 2rem;
+      }
+      @media (max-width: 720px) { footer.colophon { grid-template-columns: 1fr; } }
+      footer .wordmark {
+        font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+        font-variation-settings: 'opsz' 96, 'wdth' 75, 'wght' 700;
+        font-size: clamp(3rem, 8vw, 6rem);
+        line-height: 0.9;
+        letter-spacing: -0.04em;
+        color: var(--bone);
+        margin: 0 0 0.5rem;
+      }
+      footer .wordmark .acc { color: var(--copper); }
+      footer p {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.7rem;
+        line-height: 1.7;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--bone-soft);
+        margin: 0;
+      }
+
+      /* Reveals */
+      .reveal {
+        opacity: 0;
+        transform: translateX(-12px);
+        animation: slide 700ms cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+      }
+      .reveal:nth-child(1) { animation-delay: 60ms; }
+      .reveal:nth-child(2) { animation-delay: 140ms; }
+      .reveal:nth-child(3) { animation-delay: 220ms; }
+      .reveal:nth-child(4) { animation-delay: 300ms; }
+      .reveal:nth-child(5) { animation-delay: 380ms; }
+      .reveal:nth-child(6) { animation-delay: 460ms; }
+
+      @keyframes slide {
+        to { opacity: 1; transform: translateX(0); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="util">
+      <span><span class="dot" aria-hidden="true"></span>ESPG · Direction B · Stratigraphic Modern</span>
+      <a href={url('/previews')}>← all directions</a>
+    </div>
+
+    <aside class="core" aria-hidden="true">
+      <div class="strata"></div>
+    </aside>
+    <aside class="core-labels" aria-hidden="true">
+      {strata.map((s) => <span>{s.label} m</span>)}
+    </aside>
+
+    <main class="page">
+      <section class="hero">
+        <p class="stratum-tag reveal">Stratum 01 — Surface</p>
+        <h1 class="reveal">
+          <span class="stack">Earth Sciences</span>
+          <span class="stack compressed">Postgraduate</span>
+          <span class="stack"><span class="ital">Group.</span></span>
+        </h1>
+        <p class="lede reveal">
+          A student-run community at the University of Melbourne for postgraduates working across
+          geology, geophysics, atmospheric and environmental sciences. <strong>Built by
+          postgrads, for postgrads</strong> — a low-stakes venue for work in progress.
+        </p>
+        <div class="hero-meta reveal">
+          <div class="cell">
+            <strong>120<em>+</em></strong>
+            members across SGEAS
+          </div>
+          <div class="cell">
+            <strong>03</strong>
+            day annual conference
+          </div>
+          <div class="cell">
+            <strong>16</strong>
+            events per year
+          </div>
+          <div class="cell">
+            <strong>2007</strong>
+            year founded
+          </div>
+        </div>
+      </section>
+
+      <section class="warm">
+        <p class="stratum-tag">Stratum 02 — Upcoming</p>
+        <h2>Twelve months out, <em>five strata.</em></h2>
+        <p class="muted">
+          Events surface roughly every six weeks. Depths shown are arbitrary — a navigational
+          conceit borrowed from the core sample beside you.
+        </p>
+        <ol class="strata-list">
+          {
+            events.map((e) => (
+              <li>
+                <span class="s-depth">{e.depth}</span>
+                <span class="s-date">
+                  {e.day}<br />
+                  {e.date} <span class="yr">'{e.year}</span>
+                </span>
+                <span class="s-title">
+                  {e.title}
+                  <span class="loc">{e.loc}</span>
+                </span>
+                <span class="s-kind">{e.kind}</span>
+              </li>
+            ))
+          }
+        </ol>
+        <a href="#" class="cta cta--ghost" style="margin-top: 2rem;">
+          Full register <span class="arrow">→</span>
+        </a>
+      </section>
+
+      <section>
+        <p class="stratum-tag">Stratum 03 — Conference</p>
+        <div class="conf-grid">
+          <div>
+            <h2>An annual <em>postgraduate</em> conference, in October.</h2>
+            <p>
+              Three days of HDR-led talks alongside invited keynotes from across the earth
+              sciences. The conference is a supportive venue for students to present
+              work-in-progress, gather feedback from peers, and meet researchers from outside
+              their immediate group.
+            </p>
+            <p class="muted">Registration opens August. Call for abstracts the same week.</p>
+            <a href="#" class="cta" style="margin-top: 1rem;">
+              Conference details <span class="arrow">→</span>
+            </a>
+          </div>
+          <aside class="conf-card">
+            <dl>
+              <dt>Dates</dt>
+              <dd><strong>18–20 Oct 2026</strong></dd>
+              <dt>Location</dt>
+              <dd>University of Melbourne, Parkville</dd>
+              <dt>Theme</dt>
+              <dd>Earth in transition</dd>
+              <dt>Keynote</dt>
+              <dd>To be announced</dd>
+              <dt>Format</dt>
+              <dd>Talks · posters · lightning</dd>
+              <dt>Abstracts</dt>
+              <dd>Open Aug · close Sep</dd>
+            </dl>
+          </aside>
+        </div>
+      </section>
+
+      <section class="cool">
+        <p class="stratum-tag">Stratum 04 — Committee</p>
+        <h2>Six elected roles. <em>One year.</em></h2>
+        <p class="muted">Voted at the AGM each March. All current postgraduates in SGEAS.</p>
+        <ul class="committee-grid">
+          <li><span class="role">Chair</span><span class="desc">Direction & external rep</span></li>
+          <li><span class="role">Secretary</span><span class="desc">Minutes & comms</span></li>
+          <li><span class="role">Treasurer</span><span class="desc">Budget & grants</span></li>
+          <li><span class="role">Events</span><span class="desc">BBQs, trips, socials</span></li>
+          <li><span class="role">Conference</span><span class="desc">Annual conference</span></li>
+          <li><span class="role">HDR rep</span><span class="desc">School-level voice</span></li>
+        </ul>
+      </section>
+
+      <section>
+        <p class="stratum-tag">Stratum 05 — Join</p>
+        <h2>Membership is <em>free</em>.</h2>
+        <p>
+          For any postgraduate enrolled in SGEAS. Sign-up takes about a minute. You'll get event
+          announcements, the conference call for abstracts, and occasional opportunities from
+          outside the school.
+        </p>
+        <a href="#" class="cta">
+          Join the society <span class="arrow">→</span>
+        </a>
+      </section>
+
+      <footer class="colophon">
+        <p class="wordmark">ESP<span class="acc">G</span>.</p>
+        <p>
+          Set in Bricolage Grotesque (variable, full width and weight axes used) with Hanken
+          Grotesk for body and JetBrains Mono for tabular data. Earth Sciences Postgraduate
+          Group · School of Geography, Earth and Atmospheric Sciences · The University of
+          Melbourne · 2026.
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

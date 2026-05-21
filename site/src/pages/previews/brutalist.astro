@@ -1,0 +1,695 @@
+---
+import { url } from '../../lib/url';
+
+const events = [
+  { n: '01', date: '2026-07-15', wd: 'Wed', title: 'Welcome BBQ', loc: 'South Lawn, Parkville', kind: 'social', refn: '[1]' },
+  { n: '02', date: '2026-09-12', wd: 'Sat', title: 'Field trip — Otway Ranges', loc: 'Otway Ranges, VIC', kind: 'field', refn: '[2]' },
+  { n: '03', date: '2026-10-18', wd: 'Sun', title: 'Annual Postgraduate Conference', loc: 'Parkville, UoM', kind: 'conf.', refn: '[3]' },
+  { n: '04', date: '2026-11-14', wd: 'Sat', title: 'Reading group — neotectonics', loc: 'McCoy Building', kind: 'acad.', refn: '—' },
+  { n: '05', date: '2026-12-06', wd: 'Sun', title: 'End-of-year dinner', loc: 'Lygon St, Carlton', kind: 'social', refn: '—' },
+];
+
+const committee = [
+  ['1.0', 'Chair', 'Society direction, external representation, AGM convenor.', 'k.lee'],
+  ['2.0', 'Secretary', 'Minutes, mailing list, internal communications.', 'm.singh'],
+  ['3.0', 'Treasurer', 'Budget, grant applications, conference finance.', 'a.osman'],
+  ['4.0', 'Events officer', 'Social, field and academic events programming.', 'j.wu'],
+  ['5.0', 'Conference chair', 'Annual postgraduate conference organisation.', 't.nguyen'],
+  ['6.0', 'HDR representative', 'School-level student representation; SGEAS liaison.', 's.malik'],
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ESPG · Direction C — Brutalist Academic</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --paper: #ffffff;
+        --ink: #0a0a0a;
+        --ink-soft: #2a2a2a;
+        --muted: #6a6a6a;
+        --rule: #0a0a0a;
+        --rule-soft: #d6d6d6;
+        --hi: #ff5a1f;
+        --hi-deep: #d8431b;
+      }
+      *,
+      *::before,
+      *::after { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+        font-size: 14px;
+        line-height: 1.55;
+        font-weight: 400;
+        font-feature-settings: 'liga' 0;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* Background grid */
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.4;
+        background-image:
+          linear-gradient(to right, var(--rule-soft) 1px, transparent 1px),
+          linear-gradient(to bottom, var(--rule-soft) 1px, transparent 1px);
+        background-size: 64px 32px;
+      }
+
+      a {
+        color: var(--ink);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        text-decoration-thickness: 1px;
+      }
+      a:hover {
+        background: var(--hi);
+        color: var(--paper);
+        text-decoration: none;
+      }
+
+      /* Top bar */
+      .topbar {
+        position: relative;
+        z-index: 50;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 1rem;
+        padding: 0.6rem clamp(1rem, 3vw, 2rem);
+        border-bottom: 1px solid var(--rule);
+        background: var(--paper);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .topbar a { text-decoration: none; }
+      .topbar a:hover { background: var(--hi); color: var(--paper); }
+
+      /* Wrap */
+      .doc {
+        position: relative;
+        z-index: 1;
+        max-width: 72rem;
+        margin: 0 auto;
+        padding: clamp(1.5rem, 3vw, 2.5rem) clamp(1rem, 3vw, 2rem) 4rem;
+        background: var(--paper);
+        border-left: 1px solid var(--rule);
+        border-right: 1px solid var(--rule);
+      }
+
+      /* DICTIONARY HEAD */
+      .dict {
+        padding: clamp(2rem, 4vw, 3rem) 0 clamp(2rem, 4vw, 3rem);
+        border-bottom: 4px double var(--rule);
+        margin-bottom: clamp(2rem, 4vw, 3rem);
+      }
+      .dict-head {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+        gap: clamp(1rem, 2vw, 2rem);
+        align-items: end;
+        margin-bottom: 1.5rem;
+      }
+      .wordmark {
+        font-size: clamp(3rem, 11vw, 8rem);
+        font-weight: 700;
+        line-height: 0.85;
+        letter-spacing: -0.06em;
+        margin: 0;
+      }
+      .wordmark .acc {
+        color: var(--hi);
+      }
+      .wordmark .cursor {
+        display: inline-block;
+        width: 0.6em;
+        height: 0.85em;
+        background: var(--ink);
+        margin-left: 0.05em;
+        vertical-align: -8%;
+        animation: blink 1.05s steps(2) infinite;
+      }
+      @keyframes blink { 50% { opacity: 0; } }
+
+      .pron {
+        font-size: 0.95rem;
+        color: var(--muted);
+        line-height: 1.4;
+        padding-bottom: 0.8rem;
+      }
+      .pron .pos {
+        display: inline-block;
+        font-style: italic;
+        margin-right: 0.5rem;
+      }
+      .pron .ipa { font-style: normal; }
+      .pron .etym {
+        display: block;
+        margin-top: 0.5rem;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .defs {
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+        gap: 0.5rem 1.5rem;
+        font-size: 0.95rem;
+        max-width: 80ch;
+      }
+      .defs dt {
+        font-weight: 700;
+        color: var(--hi);
+        white-space: nowrap;
+      }
+      .defs dd {
+        margin: 0;
+        line-height: 1.55;
+      }
+      .defs dd em { font-style: italic; }
+
+      /* NAV */
+      .toc {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0 2rem;
+        padding: 0.75rem 0;
+        margin: 1.5rem 0 0;
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+        font-size: 0.78rem;
+        list-style: none;
+      }
+      .toc li { padding: 0.25rem 0; }
+      .toc a { text-decoration: none; }
+      .toc .num { color: var(--hi); font-weight: 500; margin-right: 0.4rem; }
+
+      /* SECTIONS */
+      section {
+        padding: clamp(2.5rem, 5vw, 4rem) 0;
+        border-bottom: 1px solid var(--rule);
+      }
+      section:last-of-type { border-bottom: none; }
+
+      .sect-head {
+        display: grid;
+        grid-template-columns: minmax(0, 7ch) minmax(0, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--rule);
+        align-items: baseline;
+      }
+      .sect-num {
+        color: var(--hi);
+        font-weight: 500;
+        font-size: 1rem;
+        letter-spacing: 0.04em;
+      }
+      .sect-title {
+        font-size: clamp(1.5rem, 3vw, 2.25rem);
+        font-weight: 700;
+        line-height: 1.05;
+        letter-spacing: -0.025em;
+        text-transform: uppercase;
+        margin: 0;
+      }
+      .sect-tagline {
+        grid-column: 2;
+        font-size: 0.85rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-top: 0.5rem;
+      }
+
+      .prose {
+        max-width: 78ch;
+      }
+      .prose p { margin: 0 0 1rem; }
+      .prose p strong { background: var(--hi); color: var(--paper); padding: 0 4px; font-weight: 500; }
+      .prose .fn {
+        font-size: 0.7rem;
+        vertical-align: super;
+        color: var(--hi);
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .prose .fn:hover { background: var(--hi); color: var(--paper); }
+
+      /* Tables */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 1rem 0 1.5rem;
+      }
+      table caption {
+        text-align: left;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin-bottom: 0.6rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--rule);
+      }
+      table caption strong { color: var(--ink); font-weight: 700; }
+      th, td {
+        text-align: left;
+        padding: 0.7rem 1rem 0.7rem 0;
+        border-bottom: 1px solid var(--rule-soft);
+        vertical-align: top;
+      }
+      th {
+        border-bottom: 1px solid var(--rule);
+        font-weight: 500;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+      }
+      tr:hover td { background: rgba(255, 90, 31, 0.05); }
+      td.n { color: var(--hi); font-weight: 500; width: 4ch; }
+      td.date { white-space: nowrap; color: var(--ink-soft); }
+      td.title strong { font-weight: 500; }
+      td.title .loc { display: block; color: var(--muted); font-size: 0.78rem; margin-top: 0.15rem; }
+      td.kind { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+      td.refn { color: var(--hi); font-weight: 500; text-align: right; }
+
+      /* ASCII RULE */
+      .ascii {
+        font-size: 0.78rem;
+        color: var(--rule);
+        margin: 1.5rem 0;
+        overflow: hidden;
+        white-space: nowrap;
+        user-select: none;
+      }
+
+      /* Conference block */
+      .conf {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 2rem;
+        align-items: start;
+      }
+      @media (max-width: 720px) { .conf { grid-template-columns: 1fr; } }
+      .conf-meta {
+        border: 1px solid var(--rule);
+        padding: 0;
+      }
+      .conf-meta dl {
+        margin: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+      }
+      .conf-meta dt, .conf-meta dd {
+        margin: 0;
+        padding: 0.7rem 1rem;
+        border-bottom: 1px solid var(--rule-soft);
+        font-size: 0.85rem;
+      }
+      .conf-meta dt {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        background: rgba(0, 0, 0, 0.02);
+        border-right: 1px solid var(--rule-soft);
+      }
+      .conf-meta dt:last-of-type, .conf-meta dd:last-of-type { border-bottom: none; }
+      .conf-meta strong {
+        background: var(--hi);
+        color: var(--paper);
+        padding: 0 4px;
+        font-weight: 500;
+      }
+
+      /* CTA */
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 1.2rem;
+        background: var(--ink);
+        color: var(--paper);
+        text-decoration: none;
+        border: 1px solid var(--ink);
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin: 0.5rem 0;
+        transition: background 150ms;
+      }
+      .cta:hover {
+        background: var(--hi);
+        border-color: var(--hi);
+        color: var(--paper);
+        text-decoration: none;
+      }
+      .cta.hi {
+        background: var(--hi);
+        border-color: var(--hi);
+      }
+      .cta.hi:hover { background: var(--ink); border-color: var(--ink); }
+      .cta::after { content: ' →'; }
+
+      /* Footnotes */
+      .notes {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px dashed var(--rule);
+        font-size: 0.78rem;
+        line-height: 1.6;
+        color: var(--muted);
+      }
+      .notes p {
+        margin: 0 0 0.35rem;
+        padding-left: 2.5rem;
+        text-indent: -2.5rem;
+      }
+      .notes .ref {
+        display: inline-block;
+        width: 2.2rem;
+        color: var(--hi);
+        font-weight: 500;
+      }
+
+      /* Bottom bar */
+      .endmatter {
+        margin-top: 2rem;
+        padding: 1.5rem 0;
+        border-top: 4px double var(--rule);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 2rem;
+        font-size: 0.78rem;
+      }
+      @media (max-width: 720px) { .endmatter { grid-template-columns: 1fr; } }
+      .endmatter h3 {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin: 0 0 0.5rem;
+        font-weight: 500;
+      }
+      .endmatter p { margin: 0 0 0.35rem; }
+      .endmatter .blob { background: var(--hi); color: var(--paper); padding: 0 4px; }
+
+      /* CHECKBOX list */
+      .checks {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        font-size: 0.88rem;
+      }
+      .checks li {
+        padding: 0.35rem 0 0.35rem 1.6rem;
+        position: relative;
+      }
+      .checks li::before {
+        content: '[x]';
+        position: absolute;
+        left: 0;
+        color: var(--hi);
+        font-weight: 500;
+      }
+
+      /* Initial load fade */
+      .doc {
+        opacity: 0;
+        animation: bootup 500ms ease-out 80ms forwards;
+      }
+      @keyframes bootup { to { opacity: 1; } }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <span>
+        <span style="color: var(--hi); font-weight: 500;">●</span>
+        ESPG / Direction C / Brutalist Academic / 2026-05-21
+      </span>
+      <a href={url('/previews')}>../previews/</a>
+    </div>
+
+    <article class="doc">
+      <header class="dict">
+        <div class="dict-head">
+          <h1 class="wordmark">ESP<span class="acc">G</span><span class="cursor" aria-hidden="true"></span></h1>
+          <p class="pron">
+            <span class="pos">n.</span><span class="ipa">/ˈɛs.piː.dʒiː/</span>
+            <span class="etym">Acronym · Earth · Sciences · Postgraduate · Group · est. 2007</span>
+          </p>
+        </div>
+        <dl class="defs">
+          <dt>1.</dt>
+          <dd>
+            A student-run society for postgraduates in the School of Geography, Earth and
+            Atmospheric Sciences at the University of Melbourne.
+          </dd>
+          <dt>2.</dt>
+          <dd>
+            <em>By extension:</em> the people, the events, the conference, and the mailing list.
+          </dd>
+          <dt>3.</dt>
+          <dd>
+            <em>Colloq.:</em> the group that runs the BBQ on the South Lawn every July, and the
+            October conference everyone presents at at least once.
+          </dd>
+        </dl>
+        <ul class="toc">
+          <li><a href="#purpose"><span class="num">§ 1.0</span>Purpose</a></li>
+          <li><a href="#register"><span class="num">§ 2.0</span>Register</a></li>
+          <li><a href="#programme"><span class="num">§ 3.0</span>Programme</a></li>
+          <li><a href="#committee"><span class="num">§ 4.0</span>Committee</a></li>
+          <li><a href="#membership"><span class="num">§ 5.0</span>Membership</a></li>
+        </ul>
+      </header>
+
+      <section id="purpose">
+        <header class="sect-head">
+          <span class="sect-num">§ 1.0</span>
+          <div>
+            <h2 class="sect-title">Purpose</h2>
+            <p class="sect-tagline">— what the society does, and why it persists.</p>
+          </div>
+        </header>
+        <div class="prose">
+          <p>
+            ESPG exists to build community across research groups, run social and academic events,
+            and give postgraduates a voice in school-level decisions. <strong>Membership is free
+            for any SGEAS-enrolled postgrad.</strong> We are affiliated with the UMSU Graduate
+            Student Association.<a class="fn" href="#fn1">[1]</a>
+          </p>
+          <p>
+            The committee turns over annually; the society persists. Continuity comes from a
+            shared mailing list, a public events register, and a website maintained by whoever
+            has the bandwidth that year.<a class="fn" href="#fn2">[2]</a>
+          </p>
+        </div>
+        <div class="ascii">═════════════════════════════════════════════════════════════════════════════════════════════════════════</div>
+      </section>
+
+      <section id="register">
+        <header class="sect-head">
+          <span class="sect-num">§ 2.0</span>
+          <div>
+            <h2 class="sect-title">Register</h2>
+            <p class="sect-tagline">— upcoming events, tabulated.</p>
+          </div>
+        </header>
+
+        <table>
+          <caption>
+            <strong>Table 1.</strong> Upcoming events, in chronological order. Five items shown;
+            full register continues at <a href="#">/events</a>.
+          </caption>
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Date</th>
+              <th>Event</th>
+              <th>Kind</th>
+              <th style="text-align: right;">Ref.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              events.map((e) => (
+                <tr>
+                  <td class="n">{e.n}</td>
+                  <td class="date">
+                    {e.wd}<br />
+                    <span style="color: var(--ink);">{e.date}</span>
+                  </td>
+                  <td class="title">
+                    <strong>{e.title}</strong>
+                    <span class="loc">{e.loc}</span>
+                  </td>
+                  <td class="kind">{e.kind}</td>
+                  <td class="refn">{e.refn}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+
+        <a href="#" class="cta">View full register</a>
+      </section>
+
+      <section id="programme">
+        <header class="sect-head">
+          <span class="sect-num">§ 3.0</span>
+          <div>
+            <h2 class="sect-title">Programme</h2>
+            <p class="sect-tagline">— the annual postgraduate conference, in October.</p>
+          </div>
+        </header>
+
+        <div class="conf">
+          <div class="prose">
+            <p>
+              Three days of HDR-led talks alongside invited keynotes from across the earth
+              sciences. The conference functions as a <strong>low-stakes, supportive venue</strong>
+              for students to present work-in-progress, gather feedback from peers, and meet
+              researchers from outside their immediate group.<a class="fn" href="#fn3">[3]</a>
+            </p>
+            <p>
+              The format includes 15-minute talks, 5-minute lightning presentations, a poster
+              session, and an evening conference dinner. Members are notified by email when the
+              call for abstracts opens in August.
+            </p>
+            <ul class="checks">
+              <li>Open call for abstracts — postgrads at any career stage</li>
+              <li>No registration fee for members</li>
+              <li>Travel bursaries for interstate/regional students</li>
+              <li>Catered breakfast, lunch, and conference dinner</li>
+            </ul>
+            <a href="#" class="cta hi">Conference details</a>
+          </div>
+
+          <aside class="conf-meta">
+            <dl>
+              <dt>Edition</dt>
+              <dd>2026 — Vol. XVIII</dd>
+              <dt>Dates</dt>
+              <dd><strong>18–20 Oct 2026</strong></dd>
+              <dt>Location</dt>
+              <dd>University of Melbourne, Parkville</dd>
+              <dt>Theme</dt>
+              <dd>Earth in transition</dd>
+              <dt>Keynote</dt>
+              <dd>To be announced</dd>
+              <dt>Abstracts</dt>
+              <dd>Open Aug · close Sep</dd>
+              <dt>Format</dt>
+              <dd>Talks · posters · lightning</dd>
+            </dl>
+          </aside>
+        </div>
+      </section>
+
+      <section id="committee">
+        <header class="sect-head">
+          <span class="sect-num">§ 4.0</span>
+          <div>
+            <h2 class="sect-title">Committee</h2>
+            <p class="sect-tagline">— six elected roles, voted at the AGM each March.</p>
+          </div>
+        </header>
+
+        <table>
+          <caption>
+            <strong>Table 2.</strong> Committee positions, 2026 session. All current postgraduates
+            in SGEAS. Names redacted in preview; full roster on <a href="#">/about</a>.
+          </caption>
+          <thead>
+            <tr>
+              <th>§</th>
+              <th>Position</th>
+              <th>Remit</th>
+              <th>Contact</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              committee.map((c) => (
+                <tr>
+                  <td class="n">{c[0]}</td>
+                  <td class="title"><strong>{c[1]}</strong></td>
+                  <td class="kind" style="color: var(--ink); font-size: 0.85rem; text-transform: none; letter-spacing: 0;">{c[2]}</td>
+                  <td class="kind">{c[3]}@…</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </section>
+
+      <section id="membership">
+        <header class="sect-head">
+          <span class="sect-num">§ 5.0</span>
+          <div>
+            <h2 class="sect-title">Membership</h2>
+            <p class="sect-tagline">— free for any postgrad enrolled in SGEAS.</p>
+          </div>
+        </header>
+        <div class="prose">
+          <p>
+            Sign-up takes about a minute via the Google Form linked below. You will be added to
+            the mailing list for event announcements, the conference call for abstracts, and the
+            occasional opportunity from outside the school.
+          </p>
+        </div>
+        <a href="#" class="cta hi">Join the society</a>
+        <a href="#" class="cta" style="margin-left: 0.5rem;">Mailing list only</a>
+
+        <div class="notes">
+          <p><span class="ref" id="fn1">[1]</span> Affiliation grants access to UMSU GSA grant pools, room bookings, and the GSA event calendar.</p>
+          <p><span class="ref" id="fn2">[2]</span> See <code>github.com/james-lagreca/espg-website</code>. Contributions welcomed.</p>
+          <p><span class="ref" id="fn3">[3]</span> Per the 2026 conference brief; phrasing carried over from the founding documents.</p>
+        </div>
+      </section>
+
+      <footer class="endmatter">
+        <div>
+          <h3>Colophon</h3>
+          <p>
+            Set entirely in JetBrains Mono, weights 300–700, with one italic cut. <span class="blob">No serif. No sans.</span>
+            Background is a 64×32 grid. The single accent is a high-visibility orange.
+          </p>
+          <p>Last compiled <strong style="font-weight: 500;">2026-05-21</strong> · v0.1.0</p>
+        </div>
+        <div>
+          <h3>Provenance</h3>
+          <p>Earth Sciences Postgraduate Group</p>
+          <p>School of Geography, Earth and Atmospheric Sciences</p>
+          <p>The University of Melbourne · Parkville VIC 3010</p>
+          <p>Affiliated with UMSU Graduate Student Association.</p>
+        </div>
+      </footer>
+    </article>
+  </body>
+</html>
