@@ -4,19 +4,28 @@ const year = new Date().getFullYear();
 ---
 
 <footer class="site-footer">
-  <div class="foot-logo" aria-hidden="true">
-    <img src={url('/espg-logo.svg')} alt="" />
-  </div>
-  <div class="foot-text">
-    <p>
-      <strong>ESPG</strong> · Earth Sciences Postgraduate Group · School of Geography, Earth and
-      Atmospheric Sciences · The University of Melbourne · Affiliated with the UMSU Graduate
-      Student Association.
-    </p>
-    <p>
-      © {year} ESPG. Set in Bricolage Grotesque, Hanken Grotesk and JetBrains Mono. Time scale
-      after the International Chronostratigraphic Chart (ICS 2023).
-    </p>
+  <p class="aoc">
+    ESPG acknowledges the Traditional Owners of the unceded land on which we work —
+    the <strong>Wurundjeri Woi Wurrung</strong> and <strong>Bunurong</strong> peoples of the
+    Kulin Nation — and pays respect to their Elders, past and present.
+  </p>
+
+  <div class="foot-grid">
+    <div class="foot-logo" aria-hidden="true">
+      <img src={url('/espg-logo.svg')} alt="" />
+    </div>
+    <div class="foot-text">
+      <p>
+        <strong>ESPG</strong> · Earth Sciences Postgraduate Group · School of Geography, Earth and
+        Atmospheric Sciences · The University of Melbourne · Affiliated with the UMSU Graduate
+        Student Association.
+      </p>
+      <p>
+        © {year} ESPG. Set in Bricolage Grotesque, Hanken Grotesk and JetBrains Mono. Time scale
+        after the International Chronostratigraphic Chart (ICS 2023). Climate stripes after
+        Ed Hawkins, BoM data.
+      </p>
+    </div>
   </div>
 </footer>
 
@@ -25,13 +34,35 @@ const year = new Date().getFullYear();
     margin-top: clamp(3rem, 6vw, 5rem);
     padding-top: 2rem;
     border-top: 1px solid var(--copper-soft);
+  }
+
+  /* Acknowledgement of Country — given its own block, set in a tasteful italic
+     serif-feeling line height, lightly tinted but readable. */
+  .aoc {
+    margin: 0 0 1.75rem;
+    padding: 1rem 1.25rem;
+    border-left: 2px solid var(--copper);
+    background: rgba(200, 74, 37, 0.05);
+    font-style: italic;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--bone);
+    max-width: 80ch;
+  }
+  .aoc strong {
+    color: var(--copper);
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  .foot-grid {
     display: grid;
     grid-template-columns: minmax(0, auto) minmax(0, 1fr);
     gap: clamp(1.25rem, 3vw, 2rem);
     align-items: start;
   }
   @media (max-width: 720px) {
-    .site-footer { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr; }
   }
   .foot-logo {
     width: clamp(54px, 6vw, 72px);

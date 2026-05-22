@@ -1,7 +1,9 @@
 /* ESPG · Society design tokens — stratigraphic theme */
 
 :root {
-  /* Palette */
+  /* Palette
+   * Accent shifted from yellow-orange copper to a red-orange "rust" so the
+   * warm end of the climate-stripes band visually continues into the page. */
   --bg: #18191a;
   --bg-warm: #1d1e1c;
   --bg-cool: #161819;
@@ -9,9 +11,9 @@
   --bone: #e6e1d6;
   --bone-soft: #a6a097;
   --muted: #6a655c;
-  --copper: #d07636;
-  --copper-soft: #9a5526;
-  --copper-bright: #e88a45;
+  --copper: #c84a25;
+  --copper-soft: #8a3318;
+  --copper-bright: #e26535;
   --moss: #4a5c33;
   --rule: #2e2f30;
   --rule-warm: #3a3530;
@@ -72,9 +74,9 @@ body::before {
   opacity: 0.5;
   z-index: 0;
   background-image:
-    radial-gradient(ellipse 80% 60% at 25% 35%, transparent 30%, rgba(208, 118, 54, 0.045) 30.3%, transparent 30.6%),
-    radial-gradient(ellipse 80% 60% at 25% 35%, transparent 40%, rgba(208, 118, 54, 0.04)  40.3%, transparent 40.6%),
-    radial-gradient(ellipse 80% 60% at 25% 35%, transparent 50%, rgba(208, 118, 54, 0.035) 50.3%, transparent 50.6%),
+    radial-gradient(ellipse 80% 60% at 25% 35%, transparent 30%, rgba(200, 74, 37, 0.045) 30.3%, transparent 30.6%),
+    radial-gradient(ellipse 80% 60% at 25% 35%, transparent 40%, rgba(200, 74, 37, 0.04)  40.3%, transparent 40.6%),
+    radial-gradient(ellipse 80% 60% at 25% 35%, transparent 50%, rgba(200, 74, 37, 0.035) 50.3%, transparent 50.6%),
     radial-gradient(ellipse 80% 60% at 75% 75%, transparent 25%, rgba(74, 92, 51, 0.045)  25.3%, transparent 25.6%),
     radial-gradient(ellipse 80% 60% at 75% 75%, transparent 35%, rgba(74, 92, 51, 0.04)   35.3%, transparent 35.6%),
     radial-gradient(ellipse 80% 60% at 75% 75%, transparent 45%, rgba(74, 92, 51, 0.035)  45.3%, transparent 45.6%);
