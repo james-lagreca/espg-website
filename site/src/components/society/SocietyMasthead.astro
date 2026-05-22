@@ -18,6 +18,34 @@ const wdFmt = new Intl.DateTimeFormat('en-AU', { weekday: 'short' });
 ---
 
 <section class="mast">
+  <!-- Ambient weather decoration: wispy clouds + isobar-style curves + a tiny
+       synoptic-chart H drift behind the masthead content. Very low opacity. -->
+  <svg class="mast-weather" aria-hidden="true" viewBox="0 0 600 240" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="cloudFade" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0%" stop-color="#e6e1d6" stop-opacity="0" />
+        <stop offset="50%" stop-color="#e6e1d6" stop-opacity="0.18" />
+        <stop offset="100%" stop-color="#e6e1d6" stop-opacity="0" />
+      </linearGradient>
+    </defs>
+    <!-- Three drifting wispy clouds -->
+    <path d="M40,60 Q30,40 60,48 Q80,30 110,42 Q140,38 150,58 Q170,55 165,72 Q120,70 40,68 Z"
+          fill="url(#cloudFade)" />
+    <path d="M380,90 Q370,72 400,80 Q430,68 460,82 Q490,80 500,98 Q470,100 380,98 Z"
+          fill="url(#cloudFade)" opacity="0.7" />
+    <path d="M180,180 Q175,168 200,172 Q220,162 245,174 Q260,180 250,190 Q220,192 180,188 Z"
+          fill="url(#cloudFade)" opacity="0.5" />
+    <!-- Isobar-like curves -->
+    <path d="M0,40 Q200,20 400,42 T 600,40" fill="none" stroke="#d07636" stroke-width="0.6" stroke-opacity="0.18" />
+    <path d="M0,200 Q200,180 400,202 T 600,200" fill="none" stroke="#d07636" stroke-width="0.6" stroke-opacity="0.14" />
+    <!-- Tiny synoptic high-pressure cell -->
+    <g transform="translate(540, 30)" opacity="0.35">
+      <circle r="14" fill="none" stroke="#d07636" stroke-width="0.6" />
+      <circle r="9"  fill="none" stroke="#d07636" stroke-width="0.5" />
+      <text y="3" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#d07636" letter-spacing="1">H</text>
+    </g>
+  </svg>
+
   <div class="mast-top">
     <div class="specimen reveal" aria-hidden="true">
       <div class="specimen-disc">
@@ -72,10 +100,21 @@ const wdFmt = new Intl.DateTimeFormat('en-AU', { weekday: 'short' });
 
 <style>
   .mast {
+    position: relative;
     padding: clamp(1rem, 2vw, 2rem) 0 clamp(2rem, 4vw, 3rem);
     border-bottom: 1px solid var(--rule);
     margin-bottom: clamp(2.5rem, 5vw, 4rem);
   }
+  .mast-weather {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.5;
+    z-index: 0;
+  }
+  .mast-top, .mast-lede, .nextup-tag, .nextup { position: relative; z-index: 1; }
   .mast h1 {
     font-size: clamp(2.4rem, 5.6vw, 4.4rem);
     line-height: 0.98;

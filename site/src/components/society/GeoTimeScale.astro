@@ -20,19 +20,29 @@ interface Era {
   /** Optional override for label vertical position, in % of chart height.
    *  Used to keep the thin Phanerozoic labels from colliding. */
   labelTop?: number;
+  /** Major Earth-system event at the era's base (fromMa). */
+  event?: string;
 }
 
 const eras: Era[] = [
-  { name: 'Cenozoic',         fromMa:   66.0, toMa:    0.0, color: '#F2F91D', labelTop:  5.0 },
-  { name: 'Mesozoic',         fromMa:  251.9, toMa:   66.0, color: '#67C5CA', labelTop:  9.0 },
-  { name: 'Paleozoic',        fromMa:  538.8, toMa:  251.9, color: '#99C08D', labelTop: 13.5 },
+  { name: 'Cenozoic',         fromMa:   66.0, toMa:    0.0, color: '#F2F91D', labelTop:  5.0, event: 'K–Pg impact' },
+  { name: 'Mesozoic',         fromMa:  251.9, toMa:   66.0, color: '#67C5CA', labelTop:  9.0, event: 'End-Permian extinction' },
+  { name: 'Paleozoic',        fromMa:  538.8, toMa:  251.9, color: '#99C08D', labelTop: 13.5, event: 'Cambrian explosion' },
   { name: 'Neoproterozoic',   fromMa: 1000.0, toMa:  538.8, color: '#FEB342' },
   { name: 'Mesoproterozoic',  fromMa: 1600.0, toMa: 1000.0, color: '#FDB462' },
-  { name: 'Paleoproterozoic', fromMa: 2500.0, toMa: 1600.0, color: '#F74370' },
+  { name: 'Paleoproterozoic', fromMa: 2500.0, toMa: 1600.0, color: '#F74370', event: 'Great Oxidation Event' },
   { name: 'Neoarchean',       fromMa: 2800.0, toMa: 2500.0, color: '#F9837C' },
   { name: 'Mesoarchean',      fromMa: 3200.0, toMa: 2800.0, color: '#F767A0' },
   { name: 'Paleoarchean',     fromMa: 3600.0, toMa: 3200.0, color: '#DB4D7D' },
   { name: 'Eoarchean',        fromMa: 4000.0, toMa: 3600.0, color: '#DA037F' },
+];
+
+/**
+ * Mid-era events rendered as separate copper ticks on the chart.
+ * Kept sparse to avoid clutter.
+ */
+const midEraEvents: Array<{ ageMa: number; label: string }> = [
+  { ageMa: 720, label: 'Snowball Earth' },
 ];
 
 const TOTAL_MA = 4000.0;
@@ -82,9 +92,24 @@ const bandsJson = JSON.stringify(
       bands.map((b) => (
         <div class="gts-label" data-era-label={b.name} style={`top: ${b.placementPct}%;`}>
           <span class="nm">{b.name}</span>
-          <span class="age">{b.fromMa.toFixed(1).replace(/\.0$/, '')} Ma</span>
+          <span class="age">
+            {b.fromMa.toFixed(1).replace(/\.0$/, '')} Ma{b.event && (
+              <span class="evt"> · {b.event}</span>
+            )}
+          </span>
         </div>
       ))
+    }
+    {
+      midEraEvents.map((e) => {
+        const topPct = (e.ageMa / TOTAL_MA) * 100;
+        return (
+          <div class="gts-midevent" style={`top: ${topPct}%;`}>
+            <span class="mid-tick"></span>
+            <span class="mid-label">{e.label} · {e.ageMa} Ma</span>
+          </div>
+        );
+      })
     }
   </div>
 </aside>
@@ -93,7 +118,7 @@ const bandsJson = JSON.stringify(
   .gts {
     position: fixed;
     left: 0;
-    top: 0;
+    top: 8px; /* leave room for the climate stripes band */
     bottom: 0;
     width: var(--time-col);
     z-index: 10;
@@ -213,6 +238,40 @@ const bandsJson = JSON.stringify(
     color: var(--muted);
     font-size: 0.55rem;
     margin-top: 1px;
+  }
+  .gts-label .evt {
+    color: var(--copper);
+    font-style: italic;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  /* Mid-era events (e.g. Snowball Earth) — copper tick + small label */
+  .gts-midevent {
+    position: absolute;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    pointer-events: none;
+  }
+  .gts-midevent .mid-tick {
+    display: inline-block;
+    width: 8px;
+    height: 1px;
+    background: var(--copper);
+    flex: 0 0 8px;
+    margin-left: -0.4rem;
+  }
+  .gts-midevent .mid-label {
+    font-family: var(--font-mono);
+    font-size: 0.54rem;
+    font-style: italic;
+    letter-spacing: 0.04em;
+    color: var(--copper);
+    white-space: nowrap;
   }
   .gts-label::before {
     content: '';

@@ -1,0 +1,129 @@
+---
+/**
+ * Climate "warming stripes" after Ed Hawkins (showyourstripes.info).
+ * One stripe per year, blue (cool) → red (warm), based on approximate
+ * Australian annual mean temperature anomalies vs ~1961–1990 baseline.
+ *
+ * Values are hand-encoded from BoM data and are intended to be representative,
+ * not authoritative. The point is the visual trajectory of warming over the
+ * 20th and 21st centuries.
+ *
+ * Renders as a fixed full-width slim band at the very top of every page.
+ */
+
+const startYear = 1900;
+const anomalies: number[] = [
+  // 1900s
+  -0.3, -0.4, -0.4, -0.5, -0.3, -0.6, -0.5, -0.4, -0.6, -0.4,
+  // 1910s
+  -0.6, -0.4, -0.5, -0.2, -0.7, -0.1, -0.4, -0.3, -0.1, -0.5,
+  // 1920s
+  -0.2, -0.3,  0.0, -0.5, -0.4, -0.2, -0.4, -0.6, -0.3, -0.2,
+  // 1930s
+   0.1, -0.1, -0.2, -0.6,  0.0, -0.1, -0.3, -0.5, -0.2, -0.4,
+  // 1940s
+  -0.3, -0.2, -0.4, -0.4, -0.2, -0.2, -0.4, -0.2, -0.3, -0.1,
+  // 1950s
+  -0.3, -0.1, -0.1, -0.1, -0.5, -0.4, -0.4, -0.1, -0.4, -0.4,
+  // 1960s
+  -0.2, -0.4, -0.2, -0.4, -0.5, -0.4, -0.4, -0.6, -0.1, -0.2,
+  // 1970s
+  -0.6, -0.5, -0.1,  0.1, -0.6, -0.4, -0.2,  0.0, -0.2, -0.1,
+  // 1980s
+  -0.1,  0.4, -0.4,  0.0, -0.2,  0.1, -0.1,  0.2,  0.2, -0.1,
+  // 1990s
+   0.2,  0.1, -0.4, -0.1,  0.0,  0.2,  0.1,  0.4,  0.5,  0.3,
+  // 2000s
+   0.2,  0.4,  0.1,  0.4,  0.4,  0.8,  0.4,  0.6,  0.3,  0.8,
+  // 2010s
+   0.0,  0.0,  0.3,  1.1,  0.7,  0.7,  0.7,  0.5,  0.8,  1.4,
+  // 2020–2024
+   0.6,  0.6,  0.5,  0.9,  1.2,
+];
+const endYear = startYear + anomalies.length - 1;
+
+// Ed Hawkins–style diverging palette, blue (cold) → red (hot).
+const palette = [
+  '#08306b', '#08519c', '#2171b5', '#4292c6', '#6baed6', '#9ecae1',
+  '#c6dbef', '#deebf7', '#f7f7f7',
+  '#fee0d2', '#fcbba1', '#fc9272', '#fb6a4a', '#ef3b2c', '#cb181d',
+  '#a50f15', '#67000d',
+];
+const MIN = -1.2;
+const MAX =  1.6;
+
+function colourFor(anomaly: number): string {
+  const norm = Math.min(1, Math.max(0, (anomaly - MIN) / (MAX - MIN)));
+  const idx = Math.min(palette.length - 1, Math.floor(norm * palette.length));
+  return palette[idx];
+}
+
+const N = anomalies.length;
+---
+
+<aside
+  class="cstripes"
+  aria-label={`Australian annual temperature anomaly, ${startYear}–${endYear}, after Ed Hawkins (Bureau of Meteorology)`}
+  title={`Australian annual mean temperature, ${startYear}–${endYear} · after Ed Hawkins / BoM`}
+>
+  {
+    anomalies.map((a, i) => (
+      <div
+        class="cstripe"
+        style={`background: ${colourFor(a)}; left: ${(i / N) * 100}%; width: ${100 / N}%;`}
+      />
+    ))
+  }
+  <div class="cstripes-meta" aria-hidden="true">
+    <span class="cstripes-year cstripes-year--start">{startYear}</span>
+    <span class="cstripes-caption">Australian annual temperature · after Ed Hawkins / BoM</span>
+    <span class="cstripes-year cstripes-year--end">{endYear}</span>
+  </div>
+</aside>
+
+<style>
+  .cstripes {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+    z-index: 20;
+    pointer-events: none;
+    background: var(--bg);
+  }
+  .cstripe {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+  }
+
+  /* Hover (focus on the band) reveals an inline caption beneath the stripes. */
+  .cstripes-meta {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 0;
+    overflow: hidden;
+    transition: height 220ms ease;
+    background: linear-gradient(to bottom, var(--bg), transparent);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 clamp(1rem, 3vw, 2rem);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--bone-soft);
+  }
+  .cstripes:hover .cstripes-meta {
+    height: 22px;
+  }
+  .cstripes-caption { color: var(--copper); }
+  .cstripes-year {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+</style>
