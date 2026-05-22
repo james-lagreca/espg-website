@@ -22,8 +22,7 @@
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
   /* Layout */
-  --time-col: 7.5rem;
-  --atm-col: 7.5rem;
+  --time-col: 8.5rem;
   --page-max: 80rem;
   --measure: 60ch;
 

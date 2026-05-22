@@ -1,7 +1,6 @@
 ---
 import '../styles/tokens.css';
 import GeoTimeScale from '../components/society/GeoTimeScale.astro';
-import AtmosphericProfile from '../components/society/AtmosphericProfile.astro';
 import ClimateStripes from '../components/society/ClimateStripes.astro';
 import SocietyHeader from '../components/society/SocietyHeader.astro';
 import SocietyFooter from '../components/society/SocietyFooter.astro';
@@ -40,7 +39,6 @@ const fullTitle = title === siteName ? title : `${title} · ESPG`;
 
     <ClimateStripes />
     <GeoTimeScale />
-    <AtmosphericProfile />
 
     <div class="page-shell" data-bleed={bleed ? 'true' : 'false'}>
       <SocietyHeader />
@@ -56,19 +54,10 @@ const fullTitle = title === siteName ? title : `${title} · ESPG`;
         z-index: 1;
         max-width: var(--page-max);
         margin: 0 auto;
-        padding:
-          0
-          calc(var(--atm-col) + clamp(1.5rem, 3vw, 2.5rem))
-          4rem
-          calc(var(--time-col) + clamp(1.5rem, 3vw, 2.5rem));
+        padding: 0 clamp(1.5rem, 4vw, 3rem) 4rem calc(var(--time-col) + clamp(1.5rem, 3vw, 2.5rem));
       }
       .page-shell[data-bleed='true'] .main { padding-top: 0; }
       .main { padding-top: 0; }
-      @media (max-width: 980px) {
-        .page-shell {
-          padding-right: clamp(1.5rem, 4vw, 3rem);
-        }
-      }
       @media (max-width: 860px) {
         .page-shell {
           padding-left: clamp(1.25rem, 5vw, 2rem);
