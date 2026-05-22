@@ -26,6 +26,10 @@ const committee = defineCollection({
   schema: z.object({
     name: z.string(),
     role: z.string(),
+    /** Calendar year of this committee term, e.g. 2026. The About page shows
+     *  current-year members as the active committee, and groups everyone else
+     *  by year as past committees. */
+    year: z.number(),
     photo: z.string().optional(),
     email: z.string().email().optional(),
     order: z.number().default(99),

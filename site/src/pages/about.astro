@@ -3,43 +3,80 @@ import { getCollection } from 'astro:content';
 import SocietyLayout from '../layouts/SocietyLayout.astro';
 import PageHeader from '../components/society/PageHeader.astro';
 
+const CURRENT_YEAR = 2026;
+
 const committee = (await getCollection('committee')).sort(
   (a, b) => a.data.order - b.data.order,
 );
+
+const current = committee.filter((c) => c.data.year === CURRENT_YEAR);
+const pastByYear = new Map<number, typeof committee>();
+for (const c of committee) {
+  if (c.data.year === CURRENT_YEAR) continue;
+  const list = pastByYear.get(c.data.year) ?? [];
+  list.push(c);
+  pastByYear.set(c.data.year, list);
+}
+const pastYears = [...pastByYear.keys()].sort((a, b) => b - a);
+
+// Roles we expect to fill each year, used to render placeholder cards when
+// the current committee hasn't been elected yet.
+const PLACEHOLDER_ROLES = ['President', 'Treasurer', 'Secretary', 'General Member'];
 ---
 
 <SocietyLayout
   title="About"
-  description="The Earth Sciences Postgraduate Group represents HDR students in the School of Geography, Earth and Atmospheric Sciences at the University of Melbourne."
+  description="The Earth Sciences Postgraduate Group is a student society supporting postgraduate students and staff at the University of Melbourne."
 >
   <PageHeader
     eyebrow="About"
-    title="A society for postgraduates in the earth sciences."
-    lede="ESPG represents Masters and PhD students in the School of Geography, Earth and Atmospheric Sciences at the University of Melbourne. We exist to build community across research groups, run social and academic events, and give postgraduates a voice in school-level decisions."
+    title="A student society for postgraduate Earth Sciences."
+    lede="The ESPG is here to support postgraduate students and staff in Earth Sciences at the University of Melbourne. Climate, weather, geology and more."
   />
 
   <section class="block">
-    <h2>What we do</h2>
-    <ul class="prose-list">
-      <li>An annual postgraduate-led conference for HDR students.</li>
-      <li>Regular social events: pub nights, BBQs, weekend field trips.</li>
-      <li>Skills sessions and PhD-life discussions across research areas.</li>
-      <li>Representation to the school and faculty on student matters.</li>
+    <h2>Our story</h2>
+    <p>
+      The ESPG was established as a GSA-affiliated group to support postgraduate students in the
+      School of Geography, Earth and Atmospheric Sciences (SGEAS) at the University of Melbourne.
+      We exist for the community across research groups — bringing together masters and PhD
+      students working on everything from active tectonics and isotope geochemistry to atmospheric
+      science and palaeoclimate.
+    </p>
+  </section>
+
+  <section class="block">
+    <h2>Our aims</h2>
+    <ul class="aims">
+      <li>To provide academic support and welfare to the postgraduates of the School.</li>
+      <li>To promote social interaction between all postgraduates within the School, the entire faculty and wider university community.</li>
+      <li>To foster communication of research ideas and collaborations.</li>
+      <li>To support the academic endeavors of postgraduate students and to act as a representative group.</li>
     </ul>
   </section>
 
   <section class="block">
-    <h2>The committee</h2>
-    <p class="muted">
-      Six elected roles, voted at the AGM each March. All committee members are current
-      postgraduates in SGEAS.
-    </p>
+    <h2>Committee {CURRENT_YEAR}</h2>
     {
-      committee.length === 0 ? (
-        <p class="muted">Committee members will be listed here once content is migrated.</p>
+      current.length === 0 ? (
+        <>
+          <p class="muted">
+            The {CURRENT_YEAR} committee will be elected at the AGM in March. If you'd like to
+            help run the society this year, get in touch via the contact details below.
+          </p>
+          <ul class="committee-grid">
+            {PLACEHOLDER_ROLES.map((role) => (
+              <li class="placeholder">
+                <span class="role">{role}</span>
+                <span class="name">To be elected</span>
+                <span class="hint">AGM · March {CURRENT_YEAR}</span>
+              </li>
+            ))}
+          </ul>
+        </>
       ) : (
         <ul class="committee-grid">
-          {committee.map((m) => (
+          {current.map((m) => (
             <li>
               <span class="role">{m.data.role}</span>
               <span class="name">{m.data.name}</span>
@@ -55,13 +92,45 @@ const committee = (await getCollection('committee')).sort(
     }
   </section>
 
+  {
+    pastYears.map((yr) => (
+      <section class="block">
+        <h2>Past committee — {yr}</h2>
+        <ul class="committee-grid committee-grid--past">
+          {pastByYear.get(yr)!.map((m) => (
+            <li>
+              <span class="role">{m.data.role}</span>
+              <span class="name">{m.data.name}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+
   <section class="block">
-    <h2>Affiliations</h2>
+    <h2>Contact &amp; affiliations</h2>
     <p>
-      ESPG is affiliated with the UMSU Graduate Student Association at the University of
-      Melbourne, and partners with the Geological Society of Australia (Graduate Groups program)
-      for conference and event support.
+      We're affiliated with the UMSU Graduate Student Association.
     </p>
+    <dl class="contact">
+      <div>
+        <dt>Email</dt>
+        <dd><a href="mailto:the.espg@gmail.com">the.espg@gmail.com</a></dd>
+      </div>
+      <div>
+        <dt>Address</dt>
+        <dd>
+          School of Geography, Earth and Atmospheric Sciences<br />
+          253–283 Elgin St, Carlton VIC 3053<br />
+          The University of Melbourne
+        </dd>
+      </div>
+      <div>
+        <dt>Twitter / X</dt>
+        <dd><a href="https://twitter.com/unimelbespg" target="_blank" rel="noopener noreferrer">@unimelbespg</a></dd>
+      </div>
+    </dl>
   </section>
 </SocietyLayout>
 
@@ -71,19 +140,21 @@ const committee = (await getCollection('committee')).sort(
     border-bottom: 1px solid var(--rule);
   }
   .block:last-child { border-bottom: none; }
-  .prose-list {
+
+  .aims {
     list-style: none;
     padding: 0;
     margin: 1rem 0;
     display: grid;
     gap: 0.6rem;
-    max-width: 60ch;
+    max-width: 62ch;
   }
-  .prose-list li {
+  .aims li {
     padding-left: 1.4rem;
     position: relative;
+    line-height: 1.5;
   }
-  .prose-list li::before {
+  .aims li::before {
     content: '▸';
     position: absolute;
     left: 0;
@@ -130,4 +201,50 @@ const committee = (await getCollection('committee')).sort(
     margin-top: 0.2rem;
   }
   .committee-grid .email:hover { color: var(--copper); }
+
+  .committee-grid li.placeholder .name {
+    color: var(--bone-soft);
+    font-style: italic;
+    font-variation-settings: 'opsz' 24, 'wdth' 95, 'wght' 400;
+  }
+  .committee-grid li.placeholder .hint {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 0.25rem;
+  }
+
+  .committee-grid--past .name {
+    font-size: 1rem;
+    color: var(--bone-soft);
+  }
+  .committee-grid--past .role {
+    color: var(--bone-soft);
+  }
+
+  .contact {
+    margin: 1.5rem 0 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    gap: 1.5rem 3rem;
+  }
+  .contact dt {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--bone-soft);
+    margin: 0 0 0.4rem;
+  }
+  .contact dd {
+    margin: 0;
+    line-height: 1.5;
+  }
+  .contact a {
+    color: var(--copper);
+    border-bottom: 1px solid color-mix(in srgb, var(--copper) 50%, transparent);
+  }
+  .contact a:hover { color: var(--copper-bright); }
 </style>

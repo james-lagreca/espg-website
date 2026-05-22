@@ -21,7 +21,19 @@ const register = allEvents.slice(0, 6);
 const dayFmt = new Intl.DateTimeFormat('en-AU', { day: '2-digit', month: 'short' });
 const wdFmt = new Intl.DateTimeFormat('en-AU', { weekday: 'short' });
 
-const committee = (await getCollection('committee')).sort((a, b) => a.data.order - b.data.order);
+const CURRENT_YEAR = 2026;
+const committeeAll = (await getCollection('committee')).sort((a, b) => a.data.order - b.data.order);
+const currentCommittee = committeeAll.filter((c) => c.data.year === CURRENT_YEAR);
+const pastCommittee = committeeAll
+  .filter((c) => c.data.year !== CURRENT_YEAR)
+  .reduce<{ year: number; entries: typeof committeeAll }[]>((acc, c) => {
+    const bucket = acc.find((g) => g.year === c.data.year);
+    if (bucket) bucket.entries.push(c);
+    else acc.push({ year: c.data.year, entries: [c] });
+    return acc;
+  }, [])
+  .sort((a, b) => b.year - a.year);
+const mostRecentPast = pastCommittee[0];
 ---
 
 <SocietyLayout
@@ -92,12 +104,10 @@ const committee = (await getCollection('committee')).sort((a, b) => a.data.order
       </div>
       <aside class="join-card">
         <dl class="join-stat">
-          <dt>Members</dt><dd><strong>120+</strong> across SGEAS</dd>
           <dt>Cost</dt><dd><strong>Free</strong> for SGEAS HDRs</dd>
-          <dt>Events / yr</dt><dd><strong>16</strong> on average</dd>
-          <dt>Conference</dt><dd><strong>Annual</strong>, in October</dd>
-          <dt>Founded</dt><dd><strong>2007</strong></dd>
-          <dt>Affiliated</dt><dd>UMSU GSA</dd>
+          <dt>Conference</dt><dd><strong>Annual</strong> postgraduate-led</dd>
+          <dt>Affiliation</dt><dd>UMSU Graduate Student Association</dd>
+          <dt>School</dt><dd>Geography, Earth &amp; Atmospheric Sciences</dd>
         </dl>
       </aside>
     </div>
@@ -132,21 +142,44 @@ const committee = (await getCollection('committee')).sort((a, b) => a.data.order
 
   <!-- COMMITTEE -->
   <section id="committee" class="section section--cool">
-    <p class="sect-tag">Committee</p>
-    <h2>Six elected roles. <em>One year.</em></h2>
-    <p class="muted">Voted at the AGM each March. All current postgraduates in SGEAS.</p>
+    <p class="sect-tag">Committee {CURRENT_YEAR}</p>
+    <h2>Elected at the AGM, <em>each March.</em></h2>
     {
-      committee.length === 0 ? (
-        <p class="muted">Committee members will be listed once content is migrated.</p>
+      currentCommittee.length > 0 ? (
+        <>
+          <p class="muted">All current postgraduates in SGEAS.</p>
+          <ul class="committee-grid">
+            {currentCommittee.map((m) => (
+              <li>
+                <span class="role">{m.data.role}</span>
+                <span class="desc">{m.data.name}</span>
+              </li>
+            ))}
+          </ul>
+        </>
       ) : (
-        <ul class="committee-grid">
-          {committee.slice(0, 8).map((m) => (
-            <li>
-              <span class="role">{m.data.role}</span>
-              <span class="desc">{m.data.name}</span>
-            </li>
-          ))}
-        </ul>
+        <>
+          <p class="muted">
+            The {CURRENT_YEAR} committee will be elected at the AGM in March. Interested in
+            running?{' '}
+            <a href={url('/about')}>See the role descriptions on the About page.</a>
+          </p>
+          {mostRecentPast && (
+            <>
+              <p class="muted" style="margin-top: 1.5rem;">
+                Most recent committee ({mostRecentPast.year}):
+              </p>
+              <ul class="committee-grid">
+                {mostRecentPast.entries.map((m) => (
+                  <li>
+                    <span class="role">{m.data.role}</span>
+                    <span class="desc">{m.data.name}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </>
       )
     }
     <p style="margin-top: 1.25rem;"><a href={url('/about')}>More about ESPG →</a></p>

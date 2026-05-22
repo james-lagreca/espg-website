@@ -61,22 +61,23 @@ collections:
   - name: committee
     label: Committee
     label_singular: Committee member
-    description: Current ESPG committee.
+    description: Current and past ESPG committees. Set 'Year' to the year of the committee term (e.g. 2026 for this year's committee). The About page automatically separates the current year's committee from past years.
     folder: "site/src/content/committee"
     create: true
     delete: true
-    slug: "{{slug}}"
+    slug: "{{year}}-{{slug}}"
     extension: md
     format: yaml-frontmatter
-    summary: "{{name}} — {{role}}"
-    sortable_fields: [order, name]
+    summary: "{{name}} — {{role}} ({{year}})"
+    sortable_fields: [year, order, name]
     fields:
       - { label: Name, name: name, widget: string }
-      - { label: Role, name: role, widget: string, hint: "e.g. 'Chair', 'Secretary'" }
-      - { label: Display order, name: order, widget: number, default: 99, value_type: int, hint: "Lower = higher up the committee page. 1 = first." }
+      - { label: Role, name: role, widget: string, hint: "e.g. 'President', 'Secretary', 'Treasurer', 'General Member'" }
+      - { label: Year, name: year, widget: number, default: 2026, value_type: int, min: 2007, max: 2100, hint: "Calendar year of this committee term." }
+      - { label: Display order, name: order, widget: number, default: 99, value_type: int, hint: "Lower = higher up the committee page. President = 1, Treasurer = 2, etc." }
       - { label: Photo, name: photo, widget: image, required: false }
       - { label: Email (optional), name: email, widget: string, required: false }
-      - { label: Bio, name: body, widget: markdown, hint: "A short bio. Supports markdown." }
+      - { label: Bio, name: body, widget: markdown, hint: "A short bio describing the member's research." }
 
   # ----- ABSTRACTS --------------------------------------------------------
   - name: abstracts
