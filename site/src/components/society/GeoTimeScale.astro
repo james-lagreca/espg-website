@@ -23,9 +23,9 @@ interface Era {
 }
 
 const eras: Era[] = [
-  { name: 'Cenozoic',         fromMa:   66.0, toMa:    0.0, color: '#F2F91D', labelTop: 3.0 },
-  { name: 'Mesozoic',         fromMa:  251.9, toMa:   66.0, color: '#67C5CA', labelTop: 7.0 },
-  { name: 'Paleozoic',        fromMa:  538.8, toMa:  251.9, color: '#99C08D', labelTop: 11.5 },
+  { name: 'Cenozoic',         fromMa:   66.0, toMa:    0.0, color: '#F2F91D', labelTop:  5.0 },
+  { name: 'Mesozoic',         fromMa:  251.9, toMa:   66.0, color: '#67C5CA', labelTop:  9.0 },
+  { name: 'Paleozoic',        fromMa:  538.8, toMa:  251.9, color: '#99C08D', labelTop: 13.5 },
   { name: 'Neoproterozoic',   fromMa: 1000.0, toMa:  538.8, color: '#FEB342' },
   { name: 'Mesoproterozoic',  fromMa: 1600.0, toMa: 1000.0, color: '#FDB462' },
   { name: 'Paleoproterozoic', fromMa: 2500.0, toMa: 1600.0, color: '#F74370' },
@@ -98,7 +98,7 @@ const bandsJson = JSON.stringify(
     width: var(--time-col);
     z-index: 10;
     pointer-events: none;
-    padding: 1rem 0.75rem 1.5rem 1rem;
+    padding: 2.5rem 0.75rem 1.5rem 1rem;
     display: flex;
     gap: 0.6rem;
     border-right: 1px solid var(--rule);
@@ -156,8 +156,12 @@ const bandsJson = JSON.stringify(
     top: 0;
     height: 0;
     z-index: 4;
-    will-change: transform;
-    transition: transform 90ms linear;
+    will-change: transform, opacity;
+    transition: transform 90ms linear, opacity 220ms ease;
+    opacity: 0;
+  }
+  .gts-indicator[data-visible='true'] {
+    opacity: 1;
   }
   .gts-indicator-arrow {
     position: absolute;
@@ -230,21 +234,23 @@ const bandsJson = JSON.stringify(
     position: absolute;
     left: 0;
     right: 0;
-    top: -0.25rem;
+    top: -2rem;
     padding-left: 0.4rem;
     font-family: var(--font-mono);
-    font-size: 0.6rem;
-    line-height: 1.1;
+    font-size: 0.62rem;
+    line-height: 1.15;
     color: var(--copper);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
+    font-weight: 500;
   }
   .gts-now-label .yr {
-    display: block;
+    display: inline-block;
     color: var(--bone-soft);
     text-transform: none;
     letter-spacing: 0.04em;
-    margin-top: 1px;
+    margin-left: 0.45rem;
+    font-weight: 400;
   }
 
   @media (max-width: 860px) {
@@ -284,6 +290,8 @@ const bandsJson = JSON.stringify(
       const chartH = col.clientHeight;
       const y = progress * chartH;
       indicator.style.transform = `translateY(${y}px)`;
+      // Hide the indicator while at the very top so the "● Now" dot speaks alone.
+      indicator.dataset.visible = progress > 0.005 ? 'true' : 'false';
       const pct = progress * 100;
       const era = eraAt(pct);
       if (era !== lastEra) {
