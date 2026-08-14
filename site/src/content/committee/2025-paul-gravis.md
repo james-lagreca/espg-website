@@ -1,8 +1,7 @@
 ---
-name: Paul Gravis
+name: Mana Ryuba
 role: Secretary
-year: 2025
+year: 2026
 order: 3
 ---
-
-Second-year PhD student studying climate and climate features in the Pliocene epoch.
+coming soon
