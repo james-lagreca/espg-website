@@ -1,10 +1,8 @@
 ---
-title: Welcome BBQ 2026
-date: 2026-07-15T17:30:00+10:00
-location: South Lawn, Parkville campus
-description: Start-of-semester BBQ for new and returning earth sciences postgrads. Free food, drinks, and a chance to meet your cohort.
+title: Movie night
+date: 2026-08-14T16:00:00.000+10:00
+location: Fritz Loewe Theatre - McCoy Building
+description: Join us for a geology-themed movie night with Dante’s Peak!
+draft: false
 ---
-
-A relaxed evening to kick off the semester. Come along, grab a sausage (vegetarian options available), and meet other HDR students from across the school.
-
-No need to RSVP — just turn up. Bring a hat; we're outside until sunset.
+Come along for an evening of volcanoes, natural hazards, dramatic eruptions, and questionable science. Whether you are here for the geology, the chaos, or just a relaxed night with other students, everyone is welcome.
