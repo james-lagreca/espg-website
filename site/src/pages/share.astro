@@ -1,0 +1,438 @@
+---
+/**
+ * /share  ·  Sign-up page for the informal ESPG postgrad events.
+ *
+ * Two ways to collect submissions (choose one by editing the constants below):
+ *   1. GOOGLE_FORM_URL set  -> embeds the Google Form, same pattern as /membership.
+ *   2. GOOGLE_FORM_URL ''   -> native form that opens the visitor's email app with
+ *                              a pre-filled message addressed to ESPG_EMAIL.
+ */
+import SocietyLayout from '../layouts/SocietyLayout.astro';
+import { url } from '../lib/url';
+
+// Paste the Google Form "embed" URL here (ending in ?embedded=true), or leave empty.
+const GOOGLE_FORM_URL =
+  'https://docs.google.com/forms/d/e/1FAIpQLSeK7P7if9sVMbZRRG1W1g6Sdx5bj-__hMfpGvfDb7fgtg48bg/viewform?embedded=true';
+// Address that receives the pre-filled emails when no Google Form is set.
+const ESPG_EMAIL = 'espg@example.com';
+
+const formats = [
+  {
+    id: 'one-photo',
+    name: 'One Photo, One Story',
+    blurb:
+      'Bring a photo from your research, fieldwork, travels or everyday life and tell us the story behind it.',
+  },
+  {
+    id: 'fieldwork-stories',
+    name: 'Fieldwork Stories & Snacks',
+    blurb:
+      'A five-minute story about a discovery, an unexpected challenge or a memorable day in the field.',
+  },
+  {
+    id: 'bring-an-object',
+    name: 'Bring an Object',
+    blurb:
+      'A sample, map, instrument, field notebook or any other object, and what makes it special.',
+  },
+  {
+    id: 'skill-swap',
+    name: 'Skill Swap Lunch',
+    blurb:
+      'A short demo of something useful: mapping, coding, photography, interviewing, reference management, or a skill of your choice.',
+  },
+  {
+    id: 'behind-the-lab-door',
+    name: 'Behind the Lab Door',
+    blurb: 'Show fellow postgrads around your lab or workspace and introduce what you do there.',
+  },
+];
+---
+
+<SocietyLayout
+  title="Share something"
+  description="Sign up to share a story, a skill or a glimpse of your research at an informal ESPG event."
+>
+  <div class="share">
+    <header class="intro">
+      <p class="kicker">Informal events</p>
+      <h1>Share a story, a skill or a glimpse of your research.</h1>
+      <p class="lede">
+        We run relaxed get-togethers so postgrads can meet people from across the School.
+        Contributions are short and informal, and we welcome them from every discipline and
+        every stage of candidature. A tentative idea is enough to sign up.
+      </p>
+    </header>
+
+    <section class="formats" aria-labelledby="formats-heading">
+      <h2 id="formats-heading">Five ways to take part</h2>
+      <ul>
+        {formats.map((f) => (
+          <li>
+            <h3>{f.name}</h3>
+            <p>{f.blurb}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="signup" aria-labelledby="signup-heading">
+      <h2 id="signup-heading">Sign up</h2>
+      <p class="signup-note">
+        Tell us which event or events interest you and a couple of lines about what you would
+        like to share. We will follow up to arrange dates and details. Upcoming dates appear on
+        the <a href={url('/events')}>events page</a>.
+      </p>
+
+      {GOOGLE_FORM_URL ? (
+        <div class="embed">
+          <iframe
+            src={GOOGLE_FORM_URL}
+            title="ESPG event contribution sign-up form"
+            loading="lazy"
+          >
+            Loading the form…
+          </iframe>
+        </div>
+      ) : (
+        <form id="share-form" class="form" data-to={ESPG_EMAIL} novalidate>
+          <div class="row">
+            <label for="sf-name">Name</label>
+            <input id="sf-name" name="name" type="text" autocomplete="name" required />
+          </div>
+
+          <div class="row">
+            <label for="sf-email">University email</label>
+            <input id="sf-email" name="email" type="email" autocomplete="email" required />
+          </div>
+
+          <div class="row">
+            <label for="sf-stage">Program and stage <span class="opt">(optional)</span></label>
+            <input
+              id="sf-stage"
+              name="stage"
+              type="text"
+              placeholder="e.g. PhD, second year, hydrogeology"
+            />
+          </div>
+
+          <fieldset class="row" aria-describedby="sf-format-error">
+            <legend>Which event(s) are you interested in?</legend>
+            <div class="checks">
+              {formats.map((f) => (
+                <label class="check">
+                  <input type="checkbox" name="format" value={f.name} />
+                  <span>{f.name}</span>
+                </label>
+              ))}
+            </div>
+            <p id="sf-format-error" class="error" role="alert" hidden>
+              Choose at least one event.
+            </p>
+          </fieldset>
+
+          <div class="row">
+            <label for="sf-idea">What would you like to share?</label>
+            <textarea
+              id="sf-idea"
+              name="idea"
+              rows="4"
+              required
+              placeholder="A couple of lines is plenty. A rough idea is fine."
+            ></textarea>
+          </div>
+
+          <div class="actions">
+            <button type="submit">Send my idea</button>
+            <p class="hint">
+              This opens your email app with your message ready to send to
+              <a href={`mailto:${ESPG_EMAIL}`}>{ESPG_EMAIL}</a>.
+            </p>
+          </div>
+
+          <p id="sf-status" class="status" role="status" hidden></p>
+        </form>
+      )}
+    </section>
+  </div>
+</SocietyLayout>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('#share-form');
+
+  if (form) {
+    const formatError = form.querySelector<HTMLElement>('#sf-format-error');
+    const status = form.querySelector<HTMLElement>('#sf-status');
+    const to = form.dataset.to ?? '';
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const data = new FormData(form);
+      const chosen = data.getAll('format').map(String);
+
+      if (formatError) formatError.hidden = chosen.length > 0;
+      if (!form.reportValidity() || chosen.length === 0) return;
+
+      const name = String(data.get('name') ?? '').trim();
+      const email = String(data.get('email') ?? '').trim();
+      const stage = String(data.get('stage') ?? '').trim();
+      const idea = String(data.get('idea') ?? '').trim();
+
+      const subject = `ESPG events: ${chosen.join(', ')}`;
+      const body = [
+        `Name: ${name}`,
+        `Email: ${email}`,
+        stage ? `Program and stage: ${stage}` : '',
+        '',
+        `Event(s): ${chosen.join(', ')}`,
+        '',
+        'What I would like to share:',
+        idea,
+      ]
+        .filter((line, i, all) => line !== '' || all[i - 1] !== '')
+        .join('\n');
+
+      window.location.href =
+        `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+      if (status) {
+        status.hidden = false;
+        status.textContent =
+          `Your email app should now open with the message ready. If it does not, email ${to} with the same details.`;
+      }
+    });
+  }
+</script>
+
+<style>
+  /* Local aliases. Swap the var() names for the real ones in styles/tokens.css;
+     the fallbacks match the site's charcoal and copper look. */
+  .share {
+    --s-ink: var(--color-text, #ece6dc);
+    --s-muted: var(--color-text-muted, #a59d92);
+    --s-accent: var(--color-accent, #c8814f);
+    --s-rule: var(--color-rule, rgba(236, 230, 220, 0.16));
+    --s-field: var(--color-surface, rgba(255, 255, 255, 0.04));
+    --s-display: var(--font-display, 'Bricolage Grotesque', system-ui, sans-serif);
+    --s-body: var(--font-body, 'Hanken Grotesk', system-ui, sans-serif);
+    --s-mono: var(--font-mono, 'JetBrains Mono', ui-monospace, monospace);
+
+    color: var(--s-ink);
+    font-family: var(--s-body);
+    max-width: 52rem;
+    padding-block: clamp(2rem, 6vw, 4.5rem);
+  }
+
+  .kicker {
+    font-family: var(--s-mono);
+    font-size: 0.8rem;
+    color: var(--s-accent);
+    margin: 0 0 0.75rem;
+  }
+
+  h1 {
+    font-family: var(--s-display);
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin: 0 0 1.25rem;
+    max-width: 20ch;
+  }
+
+  .lede {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--s-muted);
+    max-width: 62ch;
+    margin: 0;
+  }
+
+  h2 {
+    font-family: var(--s-display);
+    font-size: 1.5rem;
+    margin: 0 0 1.25rem;
+  }
+
+  .formats {
+    margin-top: clamp(2.5rem, 6vw, 4rem);
+  }
+
+  .formats ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--s-rule);
+  }
+
+  .formats li {
+    display: grid;
+    grid-template-columns: minmax(12rem, 16rem) 1fr;
+    gap: 0.5rem 2rem;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid var(--s-rule);
+  }
+
+  .formats h3 {
+    font-family: var(--s-display);
+    font-size: 1.1rem;
+    margin: 0;
+    color: var(--s-accent);
+  }
+
+  .formats li p {
+    margin: 0;
+    line-height: 1.55;
+  }
+
+  .signup {
+    margin-top: clamp(2.5rem, 6vw, 4rem);
+  }
+
+  .signup-note {
+    color: var(--s-muted);
+    line-height: 1.6;
+    max-width: 62ch;
+    margin: 0 0 1.75rem;
+  }
+
+  .signup a,
+  .hint a {
+    color: var(--s-accent);
+  }
+
+  .embed iframe {
+    width: 100%;
+    min-height: 60rem;
+    border: 0;
+    background: #fff;
+    border-radius: 4px;
+  }
+
+  .form {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 38rem;
+  }
+
+  .row {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  fieldset.row {
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+
+  label,
+  legend {
+    font-weight: 600;
+    padding: 0;
+  }
+
+  .opt {
+    font-weight: 400;
+    color: var(--s-muted);
+  }
+
+  input[type='text'],
+  input[type='email'],
+  textarea {
+    font: inherit;
+    color: var(--s-ink);
+    background: var(--s-field);
+    border: 1px solid var(--s-rule);
+    border-radius: 3px;
+    padding: 0.65rem 0.75rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--s-muted);
+    opacity: 0.8;
+  }
+
+  .checks {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 0.35rem;
+  }
+
+  .check {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 400;
+    cursor: pointer;
+  }
+
+  .check input {
+    accent-color: var(--s-accent);
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+  }
+
+  button {
+    font: inherit;
+    font-weight: 600;
+    color: #1e2327;
+    background: var(--s-accent);
+    border: 0;
+    border-radius: 3px;
+    padding: 0.75rem 1.4rem;
+    cursor: pointer;
+  }
+
+  button:hover {
+    filter: brightness(1.08);
+  }
+
+  input:focus-visible,
+  textarea:focus-visible,
+  button:focus-visible,
+  .check input:focus-visible {
+    outline: 2px solid var(--s-accent);
+    outline-offset: 2px;
+  }
+
+  .hint {
+    font-size: 0.875rem;
+    color: var(--s-muted);
+    margin: 0;
+    flex: 1 1 16rem;
+  }
+
+  .error {
+    color: #e8836b;
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+  }
+
+  .status {
+    border-left: 3px solid var(--s-accent);
+    padding: 0.5rem 0 0.5rem 0.9rem;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 40rem) {
+    .formats li {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
