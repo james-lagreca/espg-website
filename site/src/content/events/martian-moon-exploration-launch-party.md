@@ -12,6 +12,7 @@ description: >+
 
   Interested participants are asked to fill this poll by Friday October 16th.
 
+image: /uploads/whatsapp-image-2026-10-02-at-11.14.24.jpeg
 link: https://forms.gle/9DFws3bNmdxSuGAW7
 draft: false
 ---
