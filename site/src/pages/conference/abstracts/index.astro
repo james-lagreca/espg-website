@@ -11,15 +11,15 @@ const sessions = [...new Set(abstracts.map((a) => a.data.session).filter(Boolean
 
 <ConferenceLayout
   title="Abstracts"
-  description="Accepted abstracts for the ESPG Annual Postgraduate Conference."
+  description="Accepted abstracts for VUEESC × GESSS 2026."
 >
   <p class="eyebrow">Abstracts</p>
-  <h1>Abstracts.</h1>
-  <p class="lede">{abstracts.length} accepted abstracts, organised by session.</p>
+  <h1>Abstracts</h1>
+  {abstracts.length > 0 && <p class="lede">{abstracts.length} accepted abstracts, organised by session.</p>}
 
   {
     abstracts.length === 0 ? (
-      <p class="muted">Accepted abstracts will be published here after the review process closes.</p>
+      <div class="empty"><p>Submissions closed on 2 October. Accepted abstracts will appear here once the program is finalised.</p></div>
     ) : sessions.length > 0 ? (
       sessions.map((s) => (
         <section>
@@ -60,22 +60,20 @@ const sessions = [...new Set(abstracts.map((a) => a.data.session).filter(Boolean
     list-style: none;
     padding: 0;
     margin: 1rem 0 2.5rem;
-    border-top: 1px solid var(--c-rule);
+    border-top: 1px solid var(--rule);
   }
-  .abstract-list li { border-bottom: 1px solid var(--c-rule); }
+  .abstract-list li { border-bottom: 1px solid var(--rule); }
   .abstract-list a {
     display: block;
     padding: 1rem 0;
     border-bottom: none;
-    color: var(--c-ink);
+    color: var(--ink);
   }
-  .abstract-list a:hover .abs-title { color: var(--c-accent); }
+  .abstract-list a:hover .abs-title { color: var(--sky); }
   .abs-title {
     display: block;
-    font-family: 'Newsreader', Georgia, serif;
-    font-variation-settings: 'opsz' 22;
-    font-size: 1.1rem;
-    font-weight: 460;
+    font-weight: 600;
+    font-size: 1.05rem;
     margin-bottom: 0.25rem;
   }
 </style>

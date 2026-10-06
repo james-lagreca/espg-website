@@ -1,0 +1,42 @@
+---
+// Mountain-profile divider drawn with the conference gradient (teal → lime → gold),
+// echoing the peak on the VUEESC × GESSS poster.
+interface Props {
+  id: string;
+  class?: string;
+}
+const { id, class: className } = Astro.props;
+const gradId = `ridge-${id}`;
+---
+
+<svg
+  class:list={['ridgeline', className]}
+  viewBox="0 0 1200 80"
+  preserveAspectRatio="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <defs>
+    <linearGradient id={gradId} x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" style="stop-color: var(--teal)" />
+      <stop offset="0.55" style="stop-color: var(--lime)" />
+      <stop offset="1" style="stop-color: var(--gold)" />
+    </linearGradient>
+  </defs>
+  <polyline
+    fill="none"
+    stroke={`url(#${gradId})`}
+    stroke-width="2.5"
+    stroke-linejoin="round"
+    vector-effect="non-scaling-stroke"
+    points="0,74 110,71 200,66 270,60 330,52 380,47 430,36 470,30 505,18 540,6 570,14 600,10 635,24 670,30 720,40 760,38 820,50 880,54 950,61 1030,65 1110,70 1200,72"
+  />
+</svg>
+
+<style>
+  .ridgeline {
+    display: block;
+    width: 100%;
+    height: clamp(40px, 6vw, 72px);
+  }
+</style>

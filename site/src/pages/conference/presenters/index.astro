@@ -11,14 +11,14 @@ const others = all.filter((p) => p.data.role === 'speaker');
 
 <ConferenceLayout
   title="Presenters"
-  description="Keynote and invited speakers at the ESPG Annual Postgraduate Conference."
+  description="Keynote and invited speakers at VUEESC × GESSS 2026."
 >
-  <p class="eyebrow">Presenters</p>
-  <h1>Speakers.</h1>
+  <p class="eyebrow">Speakers</p>
+  <h1>Speakers</h1>
 
   {
     all.length === 0 ? (
-      <p class="muted">Speakers will be announced as they are confirmed.</p>
+      <div class="empty"><p>Keynote and invited speakers will be announced here as they are confirmed.</p></div>
     ) : (
       <>
         {keynotes.length > 0 && (
@@ -83,11 +83,12 @@ const others = all.filter((p) => p.data.role === 'speaker');
   .presenter-grid a {
     display: block;
     padding: 1.25rem;
-    border: 1px solid var(--c-rule);
-    background: var(--c-paper);
-    color: var(--c-ink);
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    background: var(--card);
+    color: var(--ink);
   }
-  .presenter-grid a:hover { border-color: var(--c-accent); }
-  .presenter-grid h3 { margin: 0 0 0.25rem; font-family: 'Newsreader', Georgia, serif; font-variation-settings: 'opsz' 28; font-size: 1.15rem; font-weight: 460; }
+  .presenter-grid a:hover { border-color: var(--teal); }
+  .presenter-grid h3 { margin: 0 0 0.25rem; font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; }
   .presenter-grid p { margin: 0; font-size: 0.9rem; }
 </style>

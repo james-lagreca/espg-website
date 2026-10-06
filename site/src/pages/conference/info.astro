@@ -1,42 +1,42 @@
 ---
 import ConferenceLayout from '../../layouts/ConferenceLayout.astro';
+import { url } from '../../lib/url';
 ---
 
 <ConferenceLayout
-  title="Practical info"
-  description="Venue, travel, accommodation and contact information for the ESPG Annual Postgraduate Conference."
+  title="Venue & info"
+  description="Venue, transport and access information for VUEESC × GESSS 2026 at the McCoy Building, University of Melbourne."
 >
-  <p class="eyebrow">Practical info</p>
-  <h1>Getting here, getting around.</h1>
+  <p class="eyebrow">Venue & info</p>
+  <h1>Getting there</h1>
+  <p class="lede">
+    VUEESC × GESSS 2026 is on Level 2 of the McCoy Building at the University of Melbourne's
+    Parkville campus, on Thursday 5 and Friday 6 November.
+  </p>
 
   <h2>Venue</h2>
   <p>
-    The conference will be held at the University of Melbourne, Parkville campus. Specific room
-    and building details will be published closer to the date.
+    <strong>McCoy Building, Level 2</strong><br />
+    School of Geography, Earth and Atmospheric Sciences<br />
+    University of Melbourne, Parkville VIC 3010
   </p>
 
-  <h2>Getting there</h2>
+  <h2>Transport</h2>
   <p>
-    The Parkville campus is a short tram ride from Melbourne CBD. Trams 1, 3/3a, 5, 6, 16, 64,
-    67, and 72 all stop at the campus. The closest train station is Melbourne Central (15-minute
-    walk).
-  </p>
-
-  <h2>Accommodation</h2>
-  <p>
-    Visitors will be directed to university-affiliated accommodation and nearby hotels here.
-    Details to follow.
+    The Parkville campus is a short tram ride from the Melbourne CBD. Trams 1, 3, 5, 6, 16, 64,
+    67 and 72 run along Swanston Street to the University of Melbourne stop. The closest train
+    stations are Parkville and Melbourne Central.
   </p>
 
   <h2>Accessibility</h2>
   <p>
-    All conference venues will be wheelchair accessible. If you have specific access
-    requirements, please contact the organising committee in advance.
+    If you have specific access requirements, please contact the organising committee before
+    the conference so we can help.
   </p>
 
   <h2>Contact</h2>
   <p>
-    Questions about the conference can be directed to the organising committee. Contact email
-    will be added during content migration.
+    VUEESC × GESSS 2026 is hosted by ESPG. You can reach the organising committee through the
+    <a href={url('/about')}>ESPG committee page</a>.
   </p>
 </ConferenceLayout>
