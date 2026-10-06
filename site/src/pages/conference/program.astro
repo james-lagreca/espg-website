@@ -21,22 +21,22 @@ const typeLabel: Record<string, string> = {
 
 <ConferenceLayout
   title="Program"
-  description="Full program for the ESPG Annual Postgraduate Conference, including sessions, talks, breaks and social events."
+  description="Program for VUEESC × GESSS 2026, 5–6 November at the University of Melbourne."
 >
   <p class="eyebrow">Program</p>
-  <h1>Program.</h1>
+  <h1>Program</h1>
   <p class="lede">
-    Three days of HDR-led talks, invited keynotes, posters, and social events.
+    Two days of student talks, posters and invited keynotes, 5–6 November.
   </p>
 
   {
     items.length === 0 ? (
-      <p class="muted">The program will be published closer to the conference date.</p>
+      <div class="empty"><p>The program is being finalised now that abstract submissions have closed, and will appear here soon.</p></div>
     ) : (
       days.map((day) => (
         <section class="day">
           <h2>{day}</h2>
-          <table class="agenda">
+          <div class="table-wrap"><table class="agenda">
             <thead>
               <tr>
                 <th>Time</th>
@@ -65,7 +65,7 @@ const typeLabel: Record<string, string> = {
                   </tr>
                 ))}
             </tbody>
-          </table>
+          </table></div>
         </section>
       ))
     )
@@ -74,6 +74,7 @@ const typeLabel: Record<string, string> = {
 
 <style>
   .day + .day { margin-top: 3rem; }
+  .table-wrap { overflow-x: auto; }
   .agenda {
     width: 100%;
     border-collapse: collapse;
@@ -83,12 +84,12 @@ const typeLabel: Record<string, string> = {
   .agenda td {
     text-align: left;
     padding: 0.65rem 1rem 0.65rem 0;
-    border-bottom: 1px solid var(--c-rule);
+    border-bottom: 1px solid var(--rule);
     vertical-align: top;
   }
   .agenda th {
     font-weight: 500;
-    color: var(--c-muted);
+    color: var(--ink-soft);
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -96,14 +97,14 @@ const typeLabel: Record<string, string> = {
   .time {
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
-    color: var(--c-muted);
+    color: var(--ink-soft);
   }
   .type-break,
   .type-lunch,
-  .type-social { background: rgba(0, 0, 0, 0.02); }
+  .type-social { background: rgba(20, 33, 61, 0.025); }
   .type-session-header td {
     font-weight: 600;
-    background: rgba(94, 43, 30, 0.05);
+    background: var(--paper-2);
   }
   .badge {
     display: inline-block;
@@ -111,14 +112,15 @@ const typeLabel: Record<string, string> = {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     padding: 1px 6px;
-    border-radius: 2px;
-    background: var(--c-rule);
-    color: var(--c-ink);
+    border-radius: 999px;
+    background: var(--rule);
+    color: var(--ink);
     margin-right: 0.5rem;
     vertical-align: 2px;
   }
-  .badge-keynote, .badge-session-header { background: var(--c-accent); color: #fbf9f2; }
-  .badge-talk { background: rgba(94, 43, 30, 0.15); }
+  .badge-keynote { background: var(--grad); color: var(--ink); }
+  .badge-session-header { background: var(--ink); color: var(--paper); }
+  .badge-talk { background: rgba(43, 179, 177, 0.18); }
   @media (max-width: 720px) {
     .agenda th:nth-child(4), .agenda td:nth-child(4) { display: none; }
   }

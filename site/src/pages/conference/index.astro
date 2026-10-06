@@ -1,73 +1,164 @@
 ---
 import ConferenceLayout from '../../layouts/ConferenceLayout.astro';
+import Ridgeline from '../../components/conference/Ridgeline.astro';
 import { url } from '../../lib/url';
-
-const conference = {
-  edition: 'Vol. XVIII · 2026',
-  dates: 'Dates to be confirmed (October 2026)',
-  location: 'University of Melbourne — Parkville',
-  theme: 'To be announced',
-};
 ---
 
 <ConferenceLayout
   title="Overview"
-  description="The ESPG Annual Postgraduate Conference — a peer-led venue for earth sciences HDR students to present work-in-progress."
+  description="VUEESC × GESSS 2026 — a free, student-led earth and environmental sciences conference at the University of Melbourne, 5–6 November 2026."
 >
-  <p class="eyebrow">Overview</p>
-  <h1>The ESPG Annual Postgraduate Conference.</h1>
+  <section class="hero">
+    <h1 class="wordmark">VUEESC<span class="x">×</span>GESSS</h1>
+    <div class="fullnames">
+      <p>Victorian Universities Earth and Environmental Sciences Conference</p>
+      <p>GSA Earth Science Student Symposium</p>
+    </div>
 
-  <p class="lede">
-    A peer-led conference for postgraduate students working across the earth sciences — a
-    supportive venue for HDR students to present work-in-progress alongside invited keynote
-    speakers from across the discipline.
-  </p>
+    <p class="when grad-text">5–6 November 2026</p>
+    <p class="where">
+      <strong>University of Melbourne</strong><br />
+      McCoy Building, Level 2 · Parkville
+    </p>
+  </section>
+
+  <Ridgeline id="hero" class="hero-ridge" />
+
+  <div class="pills">
+    <span class="pill pill-grad">Attendance free</span>
+    <span class="pill pill-outline"><strong>Abstracts closed</strong> Program coming soon</span>
+  </div>
 
   <dl class="meta">
-    <div><dt>Edition</dt><dd>{conference.edition}</dd></div>
-    <div><dt>Dates</dt><dd>{conference.dates}</dd></div>
-    <div><dt>Location</dt><dd>{conference.location}</dd></div>
-    <div><dt>Theme</dt><dd>{conference.theme}</dd></div>
+    <div><dt>Dates</dt><dd>Thu 5 – Fri 6 November 2026</dd></div>
+    <div><dt>Venue</dt><dd>McCoy Building Lv. 2, Parkville</dd></div>
+    <div><dt>Cost</dt><dd>Free</dd></div>
+    <div><dt>Open to</dt><dd>Students of geoscience, geography, environmental and climate sciences</dd></div>
   </dl>
 
-  <h2>What to expect</h2>
-  <ul>
-    <li>Postgraduate research talks across geology, geophysics, atmospheric and environmental sciences.</li>
-    <li>Invited keynotes from senior researchers and industry.</li>
-    <li>Poster session and lightning talks for early-stage work.</li>
-    <li>Social events and conference dinner.</li>
-  </ul>
+  <div class="cols">
+    <section>
+      <h2>About the conference</h2>
+      <p>
+        VUEESC × GESSS brings together the Victorian Universities Earth and Environmental
+        Sciences Conference and the Geological Society of Australia's Earth Science Student
+        Symposium. It is run by students, for students.
+      </p>
+      <p>
+        It is a relaxed place to present your research, whether it's finished work or still in
+        progress. You'll get feedback from peers and meet students and researchers from other
+        Victorian universities.
+      </p>
+    </section>
 
-  <h2>Registration</h2>
+    <section>
+      <h2>What to expect</h2>
+      <ul class="expect">
+        <li>Student talks across geology, geophysics, geography, environmental and climate science</li>
+        <li>Poster presentations</li>
+        <li>Invited keynote speakers</li>
+        <li>Time to meet other students in your field</li>
+      </ul>
+    </section>
+  </div>
+
+  <h2>Attending</h2>
   <p>
-    Registration opens closer to the conference date. Members of ESPG will be notified by email.
-    <a href={url('/membership')}>Become a member</a> to receive announcements.
+    Attendance is free and open to all students of geoscience, geography, environmental and
+    climate sciences. Abstract submissions closed on 2 October, and the
+    <a href={url('/conference/program')}>program</a> will be published here soon.
+  </p>
+  <p>
+    <a href={url('/membership')}>Join ESPG</a> to get conference updates by email.
   </p>
 </ConferenceLayout>
 
 <style>
+  .hero { padding-top: clamp(0.5rem, 2vw, 1.5rem); }
+  .wordmark {
+    font-size: clamp(2.6rem, 10vw, 6.5rem);
+    font-weight: 600;
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    max-width: none;
+    margin: 0 0 1.1rem;
+    white-space: nowrap;
+  }
+  .wordmark .x { font-weight: 400; margin: 0 0.08em; }
+  .fullnames {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 0.4rem 2.5rem;
+    max-width: 46rem;
+    margin-bottom: 2rem;
+  }
+  .fullnames p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: var(--ink-soft);
+  }
+  .when {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: clamp(2rem, 5.5vw, 3.4rem);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin: 0 0 0.75rem;
+    max-width: none;
+    width: fit-content;
+  }
+  .where { font-size: 1.05rem; line-height: 1.5; margin: 0; }
+  .where strong { font-weight: 600; }
+
+  .hero-ridge { margin: 2rem 0 1.75rem; }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 2.5rem; }
+
   .meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem 3rem;
-    margin: 2rem 0 2.5rem;
-    padding: 1.25rem 0;
-    border-top: 1px solid var(--c-rule);
-    border-bottom: 1px solid var(--c-rule);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: 1.25rem 2rem;
+    margin: 0 0 1rem;
+    padding: 1.4rem 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
   }
   .meta dt {
-    font-size: 0.78rem;
+    font-size: 0.7rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--c-muted);
-    margin-bottom: 0.25rem;
+    letter-spacing: 0.14em;
+    color: var(--teal);
+    margin-bottom: 0.3rem;
   }
-  .meta dd {
-    margin: 0;
-    font-family: 'Newsreader', Georgia, serif;
-    font-variation-settings: 'opsz' 28;
-    font-size: 1.1rem;
+  .meta dd { margin: 0; font-weight: 500; line-height: 1.45; }
+
+  .cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    gap: 0 3rem;
   }
-  ul { padding-left: 1.2rem; max-width: 60ch; }
-  li { margin-bottom: 0.4rem; }
+  .cols > * { min-width: 0; }
+
+  .expect { list-style: none; padding: 0; margin: 0; }
+  .expect li {
+    padding: 0.55rem 0 0.55rem 1.4rem;
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+  }
+  .expect li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 1.05rem;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--grad);
+  }
+
+  @media (max-width: 420px) {
+    .wordmark { font-size: 2.35rem; }
+  }
 </style>
